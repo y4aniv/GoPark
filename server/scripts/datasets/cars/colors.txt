@@ -1,0 +1,15 @@
+Blanc
+Noir
+Gris
+Argent
+Bleu
+Rouge
+Marron
+Vert
+Beige
+Jaune
+Or
+Orange
+Violet
+Rose
+Bordeaux

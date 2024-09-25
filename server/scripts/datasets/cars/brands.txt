@@ -1,0 +1,50 @@
+Audi
+BMW
+Mercedes-Benz
+Volkswagen
+Porsche
+Toyota
+Honda
+Nissan
+Mazda
+Subaru
+Ford
+Chevrolet
+Dodge
+Jeep
+Chrysler
+Fiat
+Alfa Romeo
+Ferrari
+Lamborghini
+Maserati
+Volvo
+Saab
+Peugeot
+Renault
+Citroën
+DS Automobiles
+Hyundai
+Kia
+Genesis
+Lexus
+Infiniti
+Acura
+Jaguar
+Land Rover
+Mini
+Rolls-Royce
+Bentley
+Aston Martin
+McLaren
+Lotus
+Tesla
+Rivian
+Lucid
+Skoda
+Seat
+Dacia
+Opel
+Vauxhall
+Suzuki
+Mitsubishi
