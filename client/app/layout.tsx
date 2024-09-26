@@ -2,11 +2,13 @@ import "@/styles/globals.css";
 import "@mantine/core/styles.layer.css";
 import "mantine-datatable/styles.layer.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
-import AppShellDefault from "@/components/AppShellDefault";
 import type { Metadata } from "next";
+import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
 
 export const metadata: Metadata = {
   title: "GoPark",
@@ -30,7 +32,8 @@ export default function RootLayout({
             fontFamily: "var(--font-family)",
           }}
         >
-          <AppShellDefault>{children}</AppShellDefault>
+          <Notifications autoClose={3000} position={"top-right"} />
+          <ModalsProvider>{children}</ModalsProvider>
         </MantineProvider>
       </body>
     </html>

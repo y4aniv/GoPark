@@ -93,7 +93,7 @@ def create_cars():
         has_two_cars = randint(0, 1)
         for i in range(2 if has_two_cars else 1):
             Car(
-                license_plate=f"{chr(randint(65, 90))}{chr(randint(65, 90))}-{randint(100, 999)}-{chr(randint(65, 90))}{chr(randint(65, 90))}",
+                license_plate=f"{chr(randint(65, 90))}{chr(randint(65, 90))}{randint(100, 999)}{chr(randint(65, 90))}{chr(randint(65, 90))}",
                 brand=choice(brands),
                 model=choice(models),
                 color=choice(colors),
@@ -102,8 +102,26 @@ def create_cars():
     
     print("[+] Cars created\n")
     
+def park_cars():
+    """
+    Seed la base de données avec des voitures garées.
+    """
+    
+    print("[?] Parking cars")
+    parkings = session.query(Parking).all()
+    cars = session.query(Car).all()
+
+    for i in range(100):
+        car = cars[i]
+        spot = choice(parkings).get_available_spot()
+        
+        car.park(spot)
+
+    print("[+] Cars parked\n")
+
 if __name__ == "__main__":
     reset_database()
     create_parkings()
     create_persons()
     create_cars()
+    park_cars()

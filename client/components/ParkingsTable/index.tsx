@@ -1,6 +1,6 @@
 "use client";
 
-import { Code, Flex, Stack, Text, Title } from "@mantine/core";
+import { Code, Flex, Loader, Stack, Text, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 import { DataTable } from "mantine-datatable";
@@ -10,11 +10,24 @@ import axios from "axios";
 const PAGE_SIZE = 5;
 
 export default function ParkingsTable() {
-  const [parkings, setParkings] = useState([]);
+  const [parkings, setParkings] = useState<
+    {
+      id: number;
+      name: string;
+      address: string;
+      city: string;
+      zip_code: string;
+      levels: number;
+      spots_per_level: number;
+    }[]
+  >([]);
   const [page, setPage] = useState(1);
   const [records, setRecords] = useState(parkings.slice(0, PAGE_SIZE));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [availableSpots, setAvailableSpots] = useState<{
+    [key: number]: number | string;
+  }>({});
 
   useEffect(() => {
     setLoading(true);
@@ -37,6 +50,23 @@ export default function ParkingsTable() {
     setRecords(parkings.slice(from, to));
   }, [page, parkings]);
 
+  useEffect(() => {
+    const spotsData: { [key: number]: number | string } = {};
+    for (const parking of records) {
+      axios
+        .get(
+          `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/spots/available`
+        )
+        .then((response) => {
+          spotsData[parking.id] = response.data.spots.length;
+        })
+        .catch(() => {
+          spotsData[parking.id] = "Erreur";
+        });
+    }
+    setAvailableSpots(spotsData);
+  }, [records]);
+
   return (
     <>
       <Stack>
@@ -53,9 +83,9 @@ export default function ParkingsTable() {
                 accessor: "id",
                 title: "#",
                 render: ({ id }) => (
-                  // <Link href={`/parkings/${id}`}>
-                  <Code>{id}</Code>
-                  // </Link>
+                  <Link href={`/parkings/${id}`}>
+                    <Code>{id}</Code>
+                  </Link>
                 ),
               },
               {
@@ -81,6 +111,20 @@ export default function ParkingsTable() {
                 render: ({ levels, spots_per_level }) => (
                   <span>{levels * spots_per_level}</span>
                 ),
+              },
+              {
+                accessor: "availableSpots",
+                title: "Places Disponibles",
+                render: ({ id }) =>
+                  availableSpots[id] !== undefined ? (
+                    availableSpots[id] === "Erreur" ? (
+                      <span>{"-"}</span>
+                    ) : (
+                      <span>{availableSpots[id]}</span>
+                    )
+                  ) : (
+                    <Loader size={20} />
+                  ),
               },
             ]}
             totalRecords={parkings.length}

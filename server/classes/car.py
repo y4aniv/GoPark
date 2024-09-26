@@ -1,11 +1,26 @@
-from models.car import CarModel
 from utils.uuid import uuidV4
 from typing import TYPE_CHECKING, Optional
+from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy.orm import relationship
+from utils.sqlalchemy import Base, session
 
 if TYPE_CHECKING:
     from classes import Person, Spot
 
-class Car(CarModel):
+class Car(Base):
+    __tablename__ = 'cars'
+    
+    id = Column(String, primary_key=True)
+    license_plate = Column(String, nullable=False)
+    brand = Column(String, nullable=False)
+    model = Column(String, nullable=False)
+    color = Column(String, nullable=False)
+
+    owner_id = Column(String, ForeignKey('persons.id'))
+    owner = relationship('Person', back_populates='cars', uselist=False, enable_typechecks=False)
+
+    spot = relationship('Spot', back_populates='car', enable_typechecks=False, uselist=False)
+
     def __init__(
             self,
             license_plate: str,
@@ -52,3 +67,21 @@ class Car(CarModel):
             "owner": self.owner.id,
             "spot": self.spot.id if self.spot else None
         }
+    
+    def park(self, spot: 'Spot') -> 'Car':
+        """
+        Gare la voiture dans une place de parking.
+
+        Paramètres :
+        - spot (Spot) : Place de parking où garer la voiture.
+
+        Sortie :
+        - Car : Voiture garée.
+        """
+        self.spot = spot
+        spot.car = self
+        spot.is_taken = True
+
+        self.save(session)
+
+        return self

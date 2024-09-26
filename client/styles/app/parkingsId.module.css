@@ -1,0 +1,6 @@
+.AppShellHeader__Burger {
+  position: absolute;
+  top: 50%;
+  left: var(--mantine-spacing-md);
+  transform: translateY(-50%);
+}

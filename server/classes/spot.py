@@ -1,11 +1,29 @@
-from models.spot import SpotModel
 from utils.uuid import uuidV4
 from typing import TYPE_CHECKING, Optional
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
+from utils.sqlalchemy import Base
 
 if TYPE_CHECKING:
     from classes import Car, Parking, Subscription
 
-class Spot(SpotModel):
+class Spot(Base):
+    __tablename__ = 'spots'
+    
+    id = Column(String, primary_key=True)
+    level = Column(Integer, nullable=False)
+    spot = Column(Integer, nullable=False)
+    tag = Column(String, nullable=False)
+    is_taken = Column(Boolean, nullable=False)
+
+    parking_id = Column(String, ForeignKey('parkings.id'))
+    parking = relationship('Parking', back_populates='spots', uselist=False, enable_typechecks=False)
+
+    car_id = Column(String, ForeignKey('cars.id'))
+    car = relationship('Car', back_populates='spot', uselist=False, enable_typechecks=False, foreign_keys=[car_id])
+
+    subscription = relationship('Subscription', back_populates='spot', uselist=False, enable_typechecks=False)
+    
     def __init__(
             self, 
             level: int,

@@ -6,11 +6,8 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.session import Session as SessionType
     from sqlalchemy.ext.declarative import DeclarativeMeta
 
-engine = create_engine('postgresql://avnadmin:AVNS_oqFmHm2dnaUYVb9RUdR@gopark-nursesync.i.aivencloud.com:20305/defaultdb?sslmode=require', 
-                       pool_timeout=30,
-                       pool_recycle=60
-                    )
-
+# engine = create_engine('postgresql://avnadmin:AVNS_oqFmHm2dnaUYVb9RUdR@gopark-nursesync.i.aivencloud.com:20305/defaultdb?sslmode=require')
+engine = create_engine('sqlite:///defaultdb.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 

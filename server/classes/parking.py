@@ -1,12 +1,27 @@
-from models.parking import ParkingModel
 from classes.spot import Spot
 from utils.uuid import uuidV4
 from typing import TYPE_CHECKING, List
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
+from utils.sqlalchemy import Base
 
 if TYPE_CHECKING:
     from classes import Subscription
 
-class Parking(ParkingModel):
+class Parking(Base):
+    __tablename__ = 'parkings'
+    
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    zip_code = Column(String, nullable=False)
+    city = Column(String, nullable=False)
+    levels = Column(Integer, nullable=False)
+    spots_per_level = Column(Integer, nullable=False)
+
+    spots = relationship('Spot', back_populates='parking', enable_typechecks=False)
+    subscriptions = relationship('Subscription', back_populates='parking', enable_typechecks=False)
+
     def __init__(
         self, 
         name: str,
@@ -37,8 +52,8 @@ class Parking(ParkingModel):
         self.spots_per_level = spots_per_level
         self.spots: List['Spot'] = [
             Spot(level, spot, self)
-            for level in range(1, levels + 1)
-            for spot in range(0, spots_per_level + 1)
+            for level in range(levels)
+            for spot in range(spots_per_level)
         ]
         self.subscriptions: List['Subscription'] = []
 
@@ -61,3 +76,33 @@ class Parking(ParkingModel):
             "spots": [spot.id for spot in self.spots],
             "subscriptions": [subscription.id for subscription in self.subscriptions]
         }
+    
+    def get_spots_by_level(self, level: int) -> List['Spot']:
+        """
+        Récupère les places d'un étage donné.
+
+        Paramètres :
+        - level (int) : Numéro de l'étage.
+
+        Sortie :
+        - List[Spot] : Liste des places de l'étage donné.
+        """
+        return [spot for spot in self.spots if spot.level == int(level)]
+    
+    def get_available_spot(self) -> 'Spot':
+        """
+        Récupère une place de parking disponible.
+
+        Sortie :
+        - Spot : Place de parking disponible.
+        """
+        return next((spot for spot in self.spots if not spot.is_taken and not spot.subscription), None)
+    
+    def get_available_spots(self) -> List['Spot']:
+        """
+        Récupère les places de parking disponibles.
+
+        Sortie :
+        - List[Spot] : Liste des places de parking disponibles.
+        """
+        return [spot for spot in self.spots if not spot.is_taken and not spot.subscription]

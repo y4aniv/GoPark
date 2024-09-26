@@ -1,11 +1,23 @@
-from models.person import PersonModel
 from utils.uuid import uuidV4
 from typing import TYPE_CHECKING, List
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
+from utils.sqlalchemy import Base
 
 if TYPE_CHECKING:
     from classes import Car, Subscription
 
-class Person(PersonModel):
+class Person(Base):
+    __tablename__ = 'persons'
+    
+    id = Column(String, primary_key=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    birth_date = Column(String, nullable=False)
+
+    cars = relationship('Car', back_populates='owner', enable_typechecks=False)
+    subscriptions = relationship('Subscription', back_populates='person', enable_typechecks=False)
+
     def __init__(
             self, 
             first_name: str,
