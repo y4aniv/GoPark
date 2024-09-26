@@ -85,3 +85,18 @@ class Car(Base):
         self.save(session)
 
         return self
+    
+    def unpark(self) -> 'Car':
+        """
+        Désactive la place de parking de la voiture.
+
+        Sortie :
+        - Car : Voiture désactivée.
+        """
+        self.spot.is_taken = False
+        self.spot.car = None
+        self.spot = None
+
+        self.save(session)
+
+        return self

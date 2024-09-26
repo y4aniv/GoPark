@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { DataTable } from "mantine-datatable";
-import { IconCar } from "@tabler/icons-react";
+import { IconCar, IconCarOff } from "@tabler/icons-react";
 import axios from "axios";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -45,7 +45,10 @@ export default function SpotsTable({
       level: number;
       spot: number;
       tag: string;
-      car: string | null;
+      car: {
+        id: string | null;
+        license_plate: string | null
+      };
       is_taken: boolean;
       parking: string;
       subscription: string | null;
@@ -87,7 +90,7 @@ export default function SpotsTable({
     modals.openConfirmModal({
       title: "Garer une voiture",
       labels: {
-        confirm: "Ajouter",
+        confirm: "Confirmer",
         cancel: "Annuler",
       },
       children: (
@@ -120,7 +123,10 @@ export default function SpotsTable({
                 spot.id === id
                   ? {
                       ...spot,
-                      car: response.data.car.license_plate,
+                      car: {
+                        id: response.data.car.id,
+                        license_plate: response.data.car.license_plate
+                      },
                       is_taken: true,
                     }
                   : spot
@@ -191,6 +197,85 @@ export default function SpotsTable({
     });
   }
 
+  function openUnparkCarModal(id: string) {
+    modals.openConfirmModal({
+      title: "Retirer une voiture",
+      labels: {
+        confirm: "Confirmer",
+        cancel: "Annuler",
+      },
+      children: (
+        <Stack>
+          <TextInput label={"Nom du parking"} value={parking?.name} disabled />
+          <TextInput
+            label={"Tag de la place"}
+            value={spots.find((spot) => spot.id === id)?.tag}
+            disabled
+          />
+          <TextInput
+            label={"Immatriculation de la voiture"}
+            value={spots.find((spot) => spot.id === id)?.car.license_plate ?? ""}
+            disabled
+          />
+        </Stack>
+      ),
+      onConfirm: () => {
+          axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots/${id}/unpark`
+          ).then(() => {
+            setSpots(
+              spots.map((spot) =>
+                spot.id === id
+                  ? {
+                      ...spot,
+                      car: {
+                        id: null,
+                        license_plate: null
+                      },
+                      is_taken: false,
+                    }
+                  : spot
+              )
+            );
+          })
+          .catch((err) => {
+            switch (err.response.data.message) {
+              case "PARKING_NOT_FOUND":
+                notifications.show({
+                  title: "Impossible de retirer la voiture",
+                  message: "Le parking n'a pas été trouvé. Veuillez réessayer.",
+                  color: "red",
+                });
+                break;
+
+              case "SPOT_NOT_FOUND":
+                notifications.show({
+                  title: "Impossible de retirer la voiture",
+                  message: "La place n'a pas été trouvée. Veuillez réessayer.",
+                  color: "red",
+                });
+                break;
+
+              case "SPOT_NOT_TAKEN":
+                notifications.show({
+                  title: "Impossible de retirer la voiture",
+                  message: "Cette place n'est pas prise.",
+                  color: "red",
+                });
+                break;
+              default:
+                notifications.show({
+                  title: "Impossible de retirer la voiture",
+                  message: "Une erreur est survenue. Veuillez réessayer.",
+                  color: "red",
+                });
+                break;
+            }
+          });
+      }
+    });
+  }
+
   return (
     <>
       <Stack>
@@ -251,7 +336,11 @@ export default function SpotsTable({
                 accessor: "car",
                 title: "Voiture",
                 render: ({ car }) =>
-                  car ? <Code>{car}</Code> : <Text>{"-"}</Text>,
+                  car.id ? (
+                    <Text>{car.license_plate}</Text>
+                  ) : (
+                    <Text>{"-"}</Text>
+                  )
               },
               {
                 accessor: "subscription",
@@ -268,14 +357,18 @@ export default function SpotsTable({
                 title: "Actions",
                 render: ({ id }) => (
                   <Group wrap={"nowrap"}>
-                    <Tooltip label={"Garer une voiture"}>
+                    <Tooltip label={spots.find(spot => spot.id === id)?.is_taken ? "Retirer la voiture" : "Garer une voiture"}>
                       <ActionIcon
-                        variant={"white"}
-                        onClick={() => {
+                      variant={"white"}
+                      onClick={() => {
+                        if (!spots.find(spot => spot.id === id)?.is_taken) {
                           openParkCarModal(id);
-                        }}
+                        }else{
+                          openUnparkCarModal(id);
+                        }
+                      }}
                       >
-                        {<IconCar />}
+                      {spots.find(spot => spot.id === id)?.is_taken ? <IconCarOff /> : <IconCar />}
                       </ActionIcon>
                     </Tooltip>
                   </Group>

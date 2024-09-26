@@ -19,15 +19,13 @@ export default function ParkingsTable() {
       zip_code: string;
       levels: number;
       spots_per_level: number;
+      available_spots: number;
     }[]
   >([]);
   const [page, setPage] = useState(1);
   const [records, setRecords] = useState(parkings.slice(0, PAGE_SIZE));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [availableSpots, setAvailableSpots] = useState<{
-    [key: number]: number | string;
-  }>({});
 
   useEffect(() => {
     setLoading(true);
@@ -49,23 +47,6 @@ export default function ParkingsTable() {
     const to = from + PAGE_SIZE;
     setRecords(parkings.slice(from, to));
   }, [page, parkings]);
-
-  useEffect(() => {
-    const spotsData: { [key: number]: number | string } = {};
-    for (const parking of records) {
-      axios
-        .get(
-          `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/spots/available`
-        )
-        .then((response) => {
-          spotsData[parking.id] = response.data.spots.length;
-        })
-        .catch(() => {
-          spotsData[parking.id] = "Erreur";
-        });
-    }
-    setAvailableSpots(spotsData);
-  }, [records]);
 
   return (
     <>
@@ -115,16 +96,9 @@ export default function ParkingsTable() {
               {
                 accessor: "availableSpots",
                 title: "Places Disponibles",
-                render: ({ id }) =>
-                  availableSpots[id] !== undefined ? (
-                    availableSpots[id] === "Erreur" ? (
-                      <span>{"-"}</span>
-                    ) : (
-                      <span>{availableSpots[id]}</span>
-                    )
-                  ) : (
-                    <Loader size={20} />
-                  ),
+                render: ({ available_spots }) => (
+                  <span>{available_spots}</span>
+                ),
               },
             ]}
             totalRecords={parkings.length}

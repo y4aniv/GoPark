@@ -19,7 +19,10 @@ def get_parkings():
     return {
         "status": "success",
         "parkings": [
-            parking.to_dict() for parking in parkings
+            {
+                "available_spots": len(parking.get_available_spots()),
+                **parking.to_dict()
+            } for parking in parkings
         ]
     }, 200
 
@@ -83,32 +86,19 @@ def get_parking_spots(parking_id):
     spots = sorted(spots, key=lambda spot: spot.tag)
     return {
         "status": "success",
-        "spots": [spot.to_dict() for spot in spots]
-    }, 200
-
-@server.get("/api/parkings/<parking_id>/spots/available")
-def get_available_spot(parking_id):
-    """
-    Récupère une place de parking disponible.
-
-    Paramètres :
-    - parking_id (str) : Identifiant du parking.
-
-    Sortie :
-    - dict : Place de parking disponible.
-    """
-    parking = session.get(Parking, parking_id)
-
-    if not parking:
-        return {
-            "status": "error",
-            "message": "PARKING_NOT_FOUND"
-        }, 404
-
-    spots = parking.get_available_spots()
-    return {
-        "status": "success",
-        "spots": [spot.to_dict() for spot in spots]
+        "spots": [{
+           "car": {
+               "id": spot.car.id if spot.car else None,
+                "license_plate": spot.car.license_plate if spot.car else None
+           },
+            "id": spot.id,
+            "is_taken": spot.is_taken,
+            "level": spot.level,
+            "parking": spot.parking.id,
+            "spot": spot.spot,
+            "subscription": spot.subscription.id if spot.subscription else None,
+            "tag":  spot.tag
+        } for spot in spots]
     }, 200
 
 @server.post('/api/parkings/<parking_id>/spots/<spot_id>/park')
@@ -172,6 +162,48 @@ def park_car(parking_id, spot_id):
         }, 400
     
     car.park(spot)
+
+    return {
+        "status": "success",
+        "car": car.to_dict()
+    }, 200
+
+@server.post('/api/parkings/<parking_id>/spots/<spot_id>/unpark')
+def unpark_car(parking_id, spot_id):
+    """
+    Désactive une place de parking.
+
+    Paramètres :
+    - parking_id (str) : Identifiant du parking.
+    - spot_id (str) : Identifiant de la place de parking.
+
+    Sortie :
+    - dict : Voiture désactivée.
+    """
+    parking = session.get(Parking, parking_id)
+
+    if not parking:
+        return {
+            "status": "error",
+            "message": "PARKING_NOT_FOUND"
+        }, 404
+
+    spot = session.get(Spot, spot_id)
+
+    if not spot:
+        return {
+            "status": "error",
+            "message": "SPOT_NOT_FOUND"
+        }, 404
+
+    if not spot.is_taken:
+        return {
+            "status": "error",
+            "message": "SPOT_NOT_TAKEN"
+        }, 400
+
+    car = spot.car
+    car.unpark()
 
     return {
         "status": "success",

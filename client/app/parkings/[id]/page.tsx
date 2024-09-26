@@ -94,11 +94,9 @@ export default function ParkingsId({
               )}
             </Title>
           </Stack>
-          <Link href={"/"}>
-            <Button variant={"transparent"} leftSection={<IconArrowLeft />}>
+          <Button variant={"transparent"} leftSection={<IconArrowLeft />} component="a" href={"/"}>
               {"Retour à l'accueil"}
             </Button>
-          </Link>
         </Stack>
       </AppShell.Navbar>
       <AppShell.Main>
