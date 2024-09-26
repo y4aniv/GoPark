@@ -87,17 +87,17 @@ export default function ParkingsTable() {
                 ),
               },
               {
-                accessor: "capacity",
-                title: "Capacité",
-                render: ({ levels, spots_per_level }) => (
-                  <span>{levels * spots_per_level}</span>
-                ),
-              },
-              {
                 accessor: "availableSpots",
                 title: "Places Disponibles",
                 render: ({ available_spots }) => (
                   <span>{available_spots}</span>
+                )
+              },
+              {
+                accessor: "capacity",
+                title: "Capacité",
+                render: ({ levels, spots_per_level }) => (
+                  <span>{levels * spots_per_level}</span>
                 ),
               },
             ]}

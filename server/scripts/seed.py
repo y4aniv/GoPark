@@ -66,10 +66,10 @@ def create_persons():
     first_names = open(first_names_path, "r").read().split("\n")
     last_names = open(last_names_path, "r").read().split("\n")
 
-    for i in range(200):
+    for i in range(600):
         Person(
-            first_name=first_names[i],
-            last_name=last_names[i],
+            first_name=first_names[i % randint(1, len(first_names))],
+            last_name=last_names[i % randint(1, len(last_names))],
             birth_date=f"{randint(1950, 2000)}-{randint(1, 12):02d}-{randint(1, 28):02d}"
         ).save(session)
 
@@ -111,9 +111,12 @@ def park_cars():
     parkings = session.query(Parking).all()
     cars = session.query(Car).all()
 
-    for i in range(100):
+    for i in range(450):
         car = cars[i]
         spot = choice(parkings).get_available_spot()
+
+        if not spot:
+            continue
         
         car.park(spot)
 

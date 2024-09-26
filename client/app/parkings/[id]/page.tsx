@@ -82,8 +82,10 @@ export default function ParkingsId({
       </AppShell.Header>
       <AppShell.Navbar>
         <Stack p={"md"}>
-          <Stack p={"md"}>
-            <Title order={4} ta={"center"}>
+        <Button variant={"transparent"} leftSection={<IconArrowLeft />} component="a" href={"/"}>
+            {"Retour à l'accueil"}
+          </Button>
+            <Title order={4} ta={"center"} p={"md"}>
               {parking?.name || error ? (
                 <>
                   {parking?.name}
@@ -93,10 +95,12 @@ export default function ParkingsId({
                 <Skeleton w={"100%"} h={30} />
               )}
             </Title>
-          </Stack>
-          <Button variant={"transparent"} leftSection={<IconArrowLeft />} component="a" href={"/"}>
-              {"Retour à l'accueil"}
-            </Button>
+          <Button>
+            {"Places de parking"}
+          </Button>
+          <Button  variant={"transparent"}>
+            {"Abonnements"}
+          </Button>
         </Stack>
       </AppShell.Navbar>
       <AppShell.Main>
