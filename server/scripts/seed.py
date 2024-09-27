@@ -130,10 +130,19 @@ def create_subscriptions():
     print("[?] Creating subscriptions")
     persons = session.query(Person).all()
     parkings = session.query(Parking).all()
-    for i in range(200):
+
+    for i in range(250):
         person = persons[i]
         parking = choice(parkings)
+
+        if not parking.get_available_spot():
+            continue
+
         spot = choice(parking.spots)
+
+        if spot.subscription:
+            continue
+
         subscription = Subscription(
             person=person,
             parking=parking,
