@@ -23,6 +23,7 @@ import SpotsTable from "@/components/SpotsTable";
 import axios from "axios";
 import styles from "@/styles/app/parkingsId.module.css";
 import { useDisclosure } from "@mantine/hooks";
+import SubscriptionsTable from "@/components/SubscriptionsTable";
 
 const PAGE_SIZE = 15;
 
@@ -95,18 +96,18 @@ export default function ParkingsId({
                 <Skeleton w={"100%"} h={30} />
               )}
             </Title>
-          <Button>
+          <Button variant={"transparent"} component="a" href={`/parkings/${params.id}`}>
             {"Places de parking"}
           </Button>
-          <Button  variant={"transparent"} component="a" href={`/parkings/${params.id}/subscriptions`}>
+          <Button>
             {"Abonnements"}
           </Button>
         </Stack>
       </AppShell.Navbar>
       <AppShell.Main>
         <Stack p={"xl"}>
-          <Title order={2}>{"Liste des places de parking"}</Title>
-          <SpotsTable parking={parking} />
+          <Title order={2}>{"Liste des abonnements"}</Title>
+          <SubscriptionsTable parking={parking} />
         </Stack>
       </AppShell.Main>
     </AppShell>

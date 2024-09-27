@@ -3,10 +3,11 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 from utils.sqlalchemy import Base
+from importlib import import_module
 
 if TYPE_CHECKING:
-    from classes import Person, Parking, Spot
-
+    from classes import Person, Spot, Parking
+    
 class Subscription(Base):
     __tablename__ = 'subscriptions'
     

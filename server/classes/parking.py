@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING, List
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
 from utils.sqlalchemy import Base
+from utils.sqlalchemy import session
 
 if TYPE_CHECKING:
-    from classes import Subscription
+    from classes import Person
 
 class Parking(Base):
     __tablename__ = 'parkings'
@@ -106,3 +107,31 @@ class Parking(Base):
         - List[Spot] : Liste des places de parking disponibles.
         """
         return [spot for spot in self.spots if not spot.is_taken and not spot.subscription]
+    
+    def subscribe(self, person: 'Person'):
+        """
+        Abonne une personne à un parking.
+
+        Paramètres :
+        - person (Person) : Personne à abonner.
+        """
+
+        from classes.subscription import Subscription
+        
+        if self.get_available_spot():
+            spot = self.get_available_spot()
+            subscription = Subscription(
+                person=person,
+                parking=self,
+                spot=spot
+            )
+            spot.subscription = subscription
+            person.subscriptions.append(subscription)
+            self.subscriptions.append(subscription)
+
+            person.save(session)
+            self.save(session)
+            subscription.save(session)
+            spot.save(session)
+            
+            return subscription

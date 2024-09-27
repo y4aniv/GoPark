@@ -59,6 +59,12 @@ export default function SpotsTable({
   const [records, setRecords] = useState(spots.slice(0, PAGE_SIZE));
   const [loading, setLoading] = useState(true);
 
+
+  useEffect(() => {
+    setPage(1);
+    setRecords(spots.slice(0, PAGE_SIZE));
+  }, [level]);
+
   useEffect(() => {
     if (parking) {
       setLoading(true);

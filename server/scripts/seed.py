@@ -1,6 +1,6 @@
 import os
 from utils.sqlalchemy import Base, engine
-from classes import Parking, Person, Car
+from classes import Parking, Person, Car, Subscription
 from utils.sqlalchemy import session
 from random import randint, choice
 
@@ -113,7 +113,7 @@ def park_cars():
 
     for i in range(450):
         car = cars[i]
-        spot = choice(parkings).get_available_spot()
+        spot = choice(choice(parkings).get_available_spots())
 
         if not spot:
             continue
@@ -122,9 +122,38 @@ def park_cars():
 
     print("[+] Cars parked\n")
 
+def create_subscriptions():
+    """
+    Seed la base de données avec des abonnements.
+    """
+    
+    print("[?] Creating subscriptions")
+    persons = session.query(Person).all()
+    parkings = session.query(Parking).all()
+    for i in range(200):
+        person = persons[i]
+        parking = choice(parkings)
+        spot = choice(parking.spots)
+        subscription = Subscription(
+            person=person,
+            parking=parking,
+            spot=spot
+        )
+
+        person.subscriptions.append(subscription)
+        parking.subscriptions.append(subscription)
+        spot.subscription = subscription
+        
+        person.save(session)
+        parking.save(session)
+        spot.save(session)
+    
+    print("[+] Subscriptions created\n")
+
 if __name__ == "__main__":
     reset_database()
     create_parkings()
     create_persons()
     create_cars()
     park_cars()
+    create_subscriptions()

@@ -210,6 +210,44 @@ def unpark_car(parking_id, spot_id):
         "car": car.to_dict()
     }, 200
 
+@server.get("/api/parkings/<parking_id>/subscriptions")
+def get_parking_subscriptions(parking_id):
+    """
+    Récupère la liste des abonnements d'un parking.
+
+    Paramètres :
+    - parking_id (str) : Identifiant du parking.
+
+    Sortie :
+    - dict : Liste des abonnements du parking.
+    """
+    parking = session.get(Parking, parking_id)
+
+    if not parking:
+        return {
+            "status": "error",
+            "message": "PARKING_NOT_FOUND"
+        }, 404
+
+    return {
+        "status": "success",
+        "subscriptions": [
+           {
+               "person": {
+                     "id": subscription.person.id,
+                        "first_name": subscription.person.first_name,
+                        "last_name": subscription.person.last_name
+               },
+                "spot": {
+                    "id": subscription.spot.id,
+                    "tag": subscription.spot.tag
+                },
+                "id": subscription.id
+           }
+            for subscription in parking.subscriptions
+        ]
+    }, 200
+
 @server.get("/api/cars")
 def get_cars():
     """
@@ -269,4 +307,4 @@ def get_persons():
     }, 200
 
 if __name__ == "__main__":
-    server.run(debug=True, port=8000)
+    server.run(debug=True, port=5000)
