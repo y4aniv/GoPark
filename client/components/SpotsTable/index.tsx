@@ -270,9 +270,9 @@ export default function SpotsTable({ parking }: Props) {
                       }}
                     >
                       {spots.find((spot) => spot.id === id)?.is_taken ? (
-                        <IconCarOff stroke={1.5} />
+                        <IconCarOff />
                       ) : (
-                        <IconCar stroke={1.5} />
+                        <IconCar />
                       )}
                     </ActionIcon>
                   </Tooltip>
