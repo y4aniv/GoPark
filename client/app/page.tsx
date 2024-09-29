@@ -8,16 +8,18 @@ import PersonsTable from "@/components/PersonsTable";
 import { useDisclosure } from "@mantine/hooks";
 import CreateParkingDrawer from "@/components/CreateParkingDrawer";
 import CreateCarDrawer from "@/components/CreateCarDrawer";
+import CreatePersonDrawer from "@/components/CreatePersonDrawer";
 
 export default function Root(): React.ReactElement {
   const [createParkingDrawerOpened, { open: openCreateParkingDrawer, close: closeCreateParkingDrawer }] = useDisclosure();
   const [createCarDrawerOpened, { open: openCreateCarDrawer, close: closeCreateCarDrawer }] = useDisclosure();
-
+  const [createPersonDrawerOpened, { open: openCreatePersonDrawer, close: closeCreatePersonDrawer }] = useDisclosure();
 
   return (
     <>
     <CreateParkingDrawer opened={createParkingDrawerOpened} onClose={closeCreateParkingDrawer} />
     <CreateCarDrawer opened={createCarDrawerOpened} onClose={closeCreateCarDrawer} />
+    <CreatePersonDrawer opened={createPersonDrawerOpened} onClose={closeCreatePersonDrawer} />
       <AppShell header={{ height: 60 }}>
         <AppShell.Header>
           <Flex justify="center" align="center" h="100%">
@@ -40,7 +42,12 @@ export default function Root(): React.ReactElement {
               </Button>
             </Flex>
             <CarsTable />
-            <Title order={2}>Liste des personnes</Title>
+            <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
+              <Title order={2}>Liste des personnes</Title>
+              <Button onClick={openCreatePersonDrawer}>
+                Ajouter une personne
+              </Button>
+            </Flex>
             <PersonsTable />
           </Stack>
         </AppShell.Main>

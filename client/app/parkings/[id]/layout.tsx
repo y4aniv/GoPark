@@ -69,7 +69,7 @@ export default function ParkingsIdLayout({
       navbar={{
         width: 250,
         breakpoint: "sm",
-        collapsed: { mobile: true },
+        collapsed: { mobile: !appShellNavbarOpened },
       }}
     >
       <AppShell.Header>
@@ -78,7 +78,7 @@ export default function ParkingsIdLayout({
           onClick={appShellNavbarToggle}
           hiddenFrom="sm"
           size="sm"
-          className={styles.appShellHeaderBurger}
+          className={styles.AppShellHeader__Burger}
         />
         <Flex justify="center" align="center" h="100%">
           <BrandLogo width={100} />
