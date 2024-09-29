@@ -69,7 +69,7 @@ def create_persons():
         Person(
             first_name=first_names[i % randint(1, len(first_names))],
             last_name=last_names[i % randint(1, len(last_names))],
-            birth_date=f"{randint(1950, 2000)}-{randint(1, 12):02d}-{randint(1, 28):02d}"
+            birth_date=f"{randint(1950, 2000)}-{randint(1, 12):02d}-{randint(1, 28):02d}T23:00:00.000Z",
         ).save(session)
 
     print("[+] Persons created\n")

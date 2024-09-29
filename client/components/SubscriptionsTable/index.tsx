@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
-import { IconTrash } from "@tabler/icons-react";
+import { IconTrash, IconX } from "@tabler/icons-react";
 import axios from "axios";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -57,6 +57,11 @@ export default function SubscriptionsTable({ parking }: Props) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [filters, setFilters] = useState<{ 
+    id: string;
+    spot: string;
+    person: string;
+  }>({ id: "", spot: "", person: "" });
 
   useEffect(() => {
     if (parking) {
@@ -81,6 +86,18 @@ export default function SubscriptionsTable({ parking }: Props) {
     const to = from + PAGE_SIZE;
     setRecords(subscriptions.slice(from, to));
   }, [page, subscriptions]);
+
+  useEffect(() => {
+    setRecords(
+      subscriptions.filter((subscription) => {
+        return (
+          (filters.id === "" || subscription.id.includes(filters.id)) &&
+          (filters.spot === "" || subscription.spot.tag.toLowerCase().includes(filters.spot.toLowerCase())) &&
+          (filters.person === "" || `${subscription.person.first_name} ${subscription.person.last_name}`.toLowerCase().includes(filters.person.toLowerCase()))
+        );
+      })
+    );
+  }, [filters, subscriptions]);
 
   const openConfirmModal = (subscriptionId: string) => {
     const subscription = subscriptions.find((s) => s.id === subscriptionId);
@@ -131,11 +148,41 @@ export default function SubscriptionsTable({ parking }: Props) {
               accessor: "id",
               title: "#",
               render: ({ id }) => <Code>{id}</Code>,
+              filter: (
+                <TextInput
+                  label="Filtrer par ID"
+                  placeholder="c78b71aa-836f-49d3-a61a-236bf86c5f38"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.id}
+                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.id !== "",
             },
             {
               accessor: "spot",
               title: "Place",
               render: ({ spot }) => <Text>{spot.tag}</Text>,
+              filter: (
+                <TextInput
+                  label="Filtrer par place"
+                  placeholder="A1"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, spot: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.spot}
+                  onChange={(event) => setFilters({ ...filters, spot: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.spot !== "",
             },
             {
               accessor: "person",
@@ -143,6 +190,21 @@ export default function SubscriptionsTable({ parking }: Props) {
               render: ({ person }) => (
                 <Text>{`${person.first_name} ${person.last_name}`}</Text>
               ),
+              filter: (
+                <TextInput
+                  label="Filtrer par propriétaire"
+                  placeholder="John Doe"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, person: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.person}
+                  onChange={(event) => setFilters({ ...filters, person: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.person !== "",
             },
             {
               accessor: "actions",

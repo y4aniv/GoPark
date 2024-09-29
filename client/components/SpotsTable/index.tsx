@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
-import { IconCar, IconCarOff } from "@tabler/icons-react";
+import { IconCar, IconCarOff, IconX } from "@tabler/icons-react";
 import axios from "axios";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -59,6 +59,21 @@ export default function SpotsTable({ parking }: Props) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Spot[]>(spots.slice(0, PAGE_SIZE));
   const [loading, setLoading] = useState<boolean>(true);
+  const [filters, setFilters] = useState<{ 
+    id: string,
+    tag: string,
+    is_taken: boolean | null,
+    is_reserved: boolean | null,
+    car: string,
+    subscription: string,
+  }>({
+    id: "",
+    tag: "",
+    is_taken: null,
+    is_reserved: null,
+    car: "",
+    subscription: "",
+  });
 
   useEffect(() => {
     setPage(1);
@@ -84,6 +99,20 @@ export default function SpotsTable({ parking }: Props) {
     const to = from + PAGE_SIZE;
     setRecords(spots.slice(from, to));
   }, [page, spots]);
+
+  useEffect(() => {
+    setRecords(spots.filter((spot) => {
+      console.log(spot.subscription, filters.subscription);
+      return (
+        (filters.id === "" || spot.id.includes(filters.id)) &&
+        (filters.tag === "" || spot.tag.includes(filters.tag)) &&
+        (filters.is_taken === null || spot.is_taken === filters.is_taken) &&
+        (filters.is_reserved === null || !!spot.subscription === filters.is_reserved) &&
+        (filters.car === "" || spot.car.license_plate?.includes(filters.car)) &&
+        (filters.subscription === "" || spot.subscription?.includes(filters.subscription))
+      );
+    }).slice(0, PAGE_SIZE));
+  }, [filters, spots]);
 
   const openParkCarModal = (id: string) => {
     let licensePlateInput = "";
@@ -225,10 +254,40 @@ export default function SpotsTable({ parking }: Props) {
               accessor: "id",
               title: "#",
               render: ({ id }) => <Code>{id}</Code>,
+              filter: (
+                <TextInput
+                  label="Filtrer par ID"
+                  placeholder="b84fc92b-5c30-4fbb-be84-7a35af1bd2d3"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.id}
+                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.id !== "",
             },
             {
               accessor: "tag",
               title: "Tag",
+              filter: (
+                <TextInput
+                  label="Filtrer par tag"
+                  placeholder="1042"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, tag: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.tag}
+                  onChange={(event) => setFilters({ ...filters, tag: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.tag !== "",
             },
             {
               accessor: "is_taken",
@@ -236,6 +295,21 @@ export default function SpotsTable({ parking }: Props) {
               render: ({ is_taken }) => (
                 <Badge color={is_taken ? "red" : undefined}>{is_taken ? "Oui" : "Non"}</Badge>
               ),
+              filter: (
+                <Select
+                  label="Filtrer par occupation"
+                  placeholder="Sélectionner une occupation"
+                  data={[
+                    { value: "true", label: "Occupée" },
+                    { value: "false", label: "Libre" },
+                    { value: "", label: "Toutes" },
+                  ]}
+                  onChange={(value) => setFilters({ ...filters, is_taken: value === "" ? null : value === "true" })}
+                  value={filters.is_taken === null ? "" : filters.is_taken.toString()}
+                  defaultValue=""
+                />
+              ),
+              filtering: filters.is_taken !== null,
             },
             {
               accessor: "subscription",
@@ -243,16 +317,67 @@ export default function SpotsTable({ parking }: Props) {
               render: ({ subscription }) => (
                 <Badge color={subscription ? "green" : undefined}>{subscription ? "Oui" : "Non"}</Badge>
               ),
+              filter: (
+                <Select
+                  label="Filtrer par réservation"
+                  placeholder="Sélectionner une réservation"
+                  data={[
+                    { value: "true", label: "Réservée" },
+                    { value: "false", label: "Non réservée" },
+                    { value: "", label: "Toutes" },
+                  ]}
+                  onChange={(value) =>
+                    setFilters({ ...filters, is_reserved: value === "" ? null : value === "true" })
+                  }
+                  value={filters.is_reserved === null ? "" : filters.is_reserved.toString()}
+                  defaultValue=""
+                />
+              ),
+              filtering: filters.is_reserved !== null,
             },
             {
               accessor: "car",
               title: "Voiture",
               render: ({ car }) => <Text>{car.id ? car.license_plate : "-"}</Text>,
+              filter: (
+                <TextInput
+                  label="Filtrer par immatriculation"
+                  placeholder="AB-123-CD"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, car: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.car}
+                  onChange={(event) => setFilters({ ...filters, car: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.car !== "",
             },
             {
               accessor: "subscription",
               title: "Abonnement",
               render: ({ subscription }) => <Code>{subscription ?? "-"}</Code>,
+              filter: (
+                <TextInput
+                  label="Filtrer par abonnement"
+                  placeholder="3ec15a3c-3826-442b-95ca-193a2f241ccd"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, subscription: "" })}
+                      variant="transparent"
+                    >
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.subscription}
+                  onChange={(event) => setFilters({ ...filters, subscription: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.subscription !== "",
             },
             {
               accessor: "actions",

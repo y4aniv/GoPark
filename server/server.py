@@ -1,15 +1,16 @@
 from flask import Flask, request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from utils.sqlalchemy import Session as session
 from classes import Parking, Car, Person, Spot, Subscription
 from typing import Dict, Any
 import re
 
 server = Flask(__name__)
-CORS(server, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}})
+CORS(server)
 
 @server.after_request
 def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
@@ -117,7 +118,7 @@ def create_parking() -> Dict[str, Any]:
         "parking": parking.to_dict()
     }, 201
 
-@server.delete("/api/parkings/<parking_id>/delete")
+@server.delete("/api/parkings/<parking_id>")
 def delete_parking(parking_id: str) -> Dict[str, Any]:
     """
     Supprime un parking.
@@ -135,11 +136,11 @@ def delete_parking(parking_id: str) -> Dict[str, Any]:
             spot.car.unpark()
         if spot.subscription:
             spot.subscription.spot = None
-        session.delete(spot)
+        spot.delete()
 
     for subscription in parking.subscriptions:
         subscription.person.subscriptions.remove(subscription)
-        session.delete(subscription)
+        subscription.delete()
 
     for car in session.query(Car).all():
         if car.spot and car.spot.parking.id == parking_id:
@@ -149,9 +150,9 @@ def delete_parking(parking_id: str) -> Dict[str, Any]:
         for subscription in person.subscriptions:
             if subscription.spot.parking.id == parking_id:
                 person.subscriptions.remove(subscription)
-                session.delete(subscription)
+                subscription.delete()
 
-    session.delete(parking)
+    parking.delete()
 
     return {
         "status": "success",
@@ -411,7 +412,6 @@ def get_parking_subscriptions(parking_id: str) -> Dict[str, Any]:
     }, 200
 
 @server.post("/api/parkings/<parking_id>/subscriptions/create")
-@cross_origin()
 def create_subscription(parking_id: str) -> Dict[str, Any]:
     """
     Crée un abonnement.
@@ -747,6 +747,60 @@ def get_persons() -> Dict[str, Any]:
         "status": "success",
         "persons": [person.to_dict() for person in persons]
     }, 200
+
+@server.post("/api/persons/create")
+def create_person() -> Dict[str, Any]:
+    """
+    Crée une personne.
+
+    Entrée :
+    - dict : Informations de la personne.
+
+    Sortie :
+    - dict : Personne créée.
+    """
+    data = request.json
+
+    if not data:
+        return {
+            "status": "error",
+            "message": "NO_DATA"
+        }, 400
+
+    first_name = data.get("firstName")
+    last_name = data.get("lastName")
+    birth_date = data.get("birthDate")
+
+    if not first_name or len(first_name) < 1:
+        return {
+            "status": "error",
+            "message": "INVALID_FIRST_NAME"
+        }, 400
+    
+    if not last_name or len(last_name) < 1:
+        return {
+            "status": "error",
+            "message": "INVALID_LAST_NAME"
+        }, 400
+    
+    if not birth_date or not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$", birth_date):
+        return {
+            "status": "error",
+            "message": "INVALID_BIRTH_DATE"
+        }, 400
+    
+    person = Person(
+        first_name=first_name,
+        last_name=last_name,
+        birth_date=birth_date
+    )
+
+    person.save()
+
+    return {
+        "status": "success",
+        "person": person.to_dict()
+    }, 201
 
 if __name__ == "__main__":
     server.run(debug=True, port=8000)

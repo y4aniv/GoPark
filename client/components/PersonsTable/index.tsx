@@ -1,9 +1,11 @@
 "use client";
 
-import { Code, Flex, Stack, Text } from "@mantine/core";
+import { ActionIcon, Code, Flex, Stack, Text, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
 import axios from "axios";
+import { IconX } from "@tabler/icons-react";
+import { DatePicker } from "@mantine/dates";
 
 const PAGE_SIZE = 15;
 
@@ -20,6 +22,20 @@ export default function PersonsTable() {
   const [records, setRecords] = useState<Person[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
+  const [filters, setFilters] = useState<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    birthDate: [
+      Date | null,
+      Date | null
+    ]
+  }>({
+    id: "",
+    firstName: "",
+    lastName: "",
+    birthDate: [null, null]
+  });
 
   useEffect(() => {
     const fetchPersons = async () => {
@@ -44,6 +60,18 @@ export default function PersonsTable() {
     setRecords(persons.slice(from, to));
   }, [page, persons]);
 
+  useEffect(() => {
+    setRecords(persons.filter((person) => {
+      return (
+        (filters.id === "" || person.id.toString().includes(filters.id)) &&
+        (filters.firstName === "" || person.first_name.toLowerCase().includes(filters.firstName.toLowerCase())) &&
+        (filters.lastName === "" || person.last_name.toLowerCase().includes(filters.lastName.toLowerCase())) &&
+        (filters.birthDate[0] === null || new Date(person.birth_date) >= filters.birthDate[0]) &&
+        (filters.birthDate[1] === null || new Date(person.birth_date) <= filters.birthDate[1])
+      );
+    }).slice(0, PAGE_SIZE));
+  }, [filters, persons]);
+
   return (
     <Stack>
       {!error ? (
@@ -58,14 +86,59 @@ export default function PersonsTable() {
               accessor: "id",
               title: "#",
               render: ({ id }) => <Code>{id}</Code>,
+              filter: (
+                <TextInput
+                  label="Filtrer par ID"
+                  placeholder="c8157290-8740-4b5a-b2e4-616c5ef8cfe8"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.id}
+                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.id !== "",
             },
             {
               accessor: "first_name",
               title: "Prénom",
+              filter: (
+                <TextInput
+                  label="Filtrer par prénom"
+                  placeholder="John"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, firstName: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.firstName}
+                  onChange={(event) => setFilters({ ...filters, firstName: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.firstName !== "",
             },
             {
               accessor: "last_name",
               title: "Nom de famille",
+              filter: (
+                <TextInput
+                  label="Filtrer par nom de famille"
+                  placeholder="Doe"
+                  leftSection={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, lastName: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.lastName}
+                  onChange={(event) => setFilters({ ...filters, lastName: event.currentTarget.value })}
+                />
+              ),
+              filtering: filters.lastName !== "",
             },
             {
               accessor: "birth_date",
@@ -78,6 +151,16 @@ export default function PersonsTable() {
                   year: "numeric",
                 });
               },
+              filter: (
+                <DatePicker
+                  type="range"
+                  onChange={(value) => {
+                    setFilters({ ...filters, birthDate: value });
+                  }}
+                  value={filters.birthDate}
+                />
+              ),
+              filtering: filters.birthDate[0] !== null || filters.birthDate[1] !== null,
             },
           ]}
           totalRecords={persons.length}

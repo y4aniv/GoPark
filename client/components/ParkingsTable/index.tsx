@@ -68,8 +68,9 @@ export default function ParkingsTable() {
         (filters.availableSpots === 0 || parking.available_spots >= filters.availableSpots) &&
         (filters.capacity === 0 || parking.levels * parking.spots_per_level >= filters.capacity)
       );
-    }))
-  }, [filters]);
+    }).slice(0, PAGE_SIZE)
+  )
+  }, [filters, parkings]);
 
   return (
     <Stack>
