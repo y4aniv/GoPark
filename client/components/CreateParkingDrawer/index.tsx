@@ -63,8 +63,8 @@ export default function CreateParkingDrawer({
                 break;
               default:
                 notifications.show({
-                  title: "Une erreur est survenue",
-                  message: `Le serveur a rencontré un problème, veuillez réessayer plus tard. ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
+                  title: "Impossible de créer le parking",
+                  message: `Une erreur est survenue lors de la création du parking: ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
                 })
             }
           } finally {

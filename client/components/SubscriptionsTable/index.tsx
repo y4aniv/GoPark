@@ -109,7 +109,7 @@ export default function SubscriptionsTable({ parking }: Props) {
           })
           .catch(() => {
             notifications.show({
-              title: "Erreur",
+              title: "Impossible de supprimer l'abonnement",
               message: "Une erreur est survenue lors de la suppression de l'abonnement",
             });
           });

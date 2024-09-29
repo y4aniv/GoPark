@@ -24,9 +24,9 @@ export default function CreatePersonDrawer({
           birthDate: "",
         },
         validate: {
-          firstName: (value) => value.trim().length < 0 ? "Ce champ est requis" : null,
-          lastName: (value) => value.trim().length < 0 ? "Ce champ est requis" : null,
-          birthDate: (value) => value.trim().length < 0 ? "Ce champ est requis" : null,
+          firstName: (value) => value.length == 0 ? "Ce champ est requis" : null,
+          lastName: (value) => value.length == 0 ? "Ce champ est requis" : null,
+          birthDate: (value) => value.length == 0 ? "Ce champ est requis" : null,
         }
     })
 
@@ -35,7 +35,19 @@ export default function CreatePersonDrawer({
     return (
         <Drawer opened={opened} onClose={onClose}>
         <form onSubmit={form.onSubmit(async() => {
-          console.log("ok")
+          try {
+            setLoading(true);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/persons/create`, form.values)
+            onClose();
+          } catch (error: any) {
+            notifications.show({
+              title: "Impossible de créer la personne",
+              message: `Une erreur est survenue lors de la création de la personne : ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
+              color: "red",
+            });
+          }finally{
+            setLoading(false);
+          }
         })}>
           <Stack>
             <Title order={2}>Ajouter une personne</Title>

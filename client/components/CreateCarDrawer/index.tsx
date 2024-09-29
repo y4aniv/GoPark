@@ -66,7 +66,7 @@ export default function CreateCarDrawer({
               color: form.values.color.trim(),
               owner: form.values.owner,
             })
-
+            onClose();
             router.refresh(); // TODO: Find a better way to refresh the page
           }catch (error: any) {
             switch (error.response.data.message){
@@ -78,8 +78,8 @@ export default function CreateCarDrawer({
                 break;
               default:
                 notifications.show({
-                  title: "Une erreur est servenue",
-                  message: `Le serveur a rencontré un problème, veuillez réessayer plus tard. ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
+                  title: "Impossible de créer la voiture",
+                  message: `Une erreur est survenue lors de la création de la voiture: ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
                 });
             }
           } finally {

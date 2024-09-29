@@ -143,9 +143,10 @@ export default function ParkingsIdLayout({
               onConfirm: async () => {
                 setIsDeleting(true);
                 try {
-                  await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}/delete`);
+                  await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`);
                   router.push("/");
                 } catch {
+                  setIsDeleting(false);
                   notifications.show({
                     title: "Impossible de supprimer le parking",
                     message: "Une erreur est survenue lors de la suppression du parking. Veuillez réessayer.",

@@ -81,6 +81,7 @@ export default function CreateSubscriptionDrawer({
               spot: form.values.spot,
               owner: form.values.owner,
             })
+            onClose();
             router.refresh(); // TODO: Find a better way to refresh the page
           } catch (error: any) {
             notifications.show({
@@ -89,7 +90,6 @@ export default function CreateSubscriptionDrawer({
             })
           } finally {
             setLoading(false);
-            onClose();
           }
         })}>
           <Stack>

@@ -1,13 +1,13 @@
 "use client";
 
-import { Code, Flex, Stack, Text } from "@mantine/core";
+import { ActionIcon, Code, Flex, Stack, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
 import axios from "axios";
+import { IconX } from "@tabler/icons-react";
 
 const PAGE_SIZE = 15;
 
-// Type pour une voiture
 interface Car {
   id: number;
   license_plate: string;
@@ -22,6 +22,19 @@ export default function CarsTable() {
   const [records, setRecords] = useState<Car[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
+  const [filters, setFilters] = useState<{
+    id: string;
+    licensePlate: string;
+    brand: string;
+    model: string;
+    color: string;
+  }>({
+    id: "",
+    licensePlate: "",
+    brand: "",
+    model: "",
+    color: "",
+  });
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -60,6 +73,21 @@ export default function CarsTable() {
               accessor: "id",
               title: "#",
               render: ({ id }: Car) => <Code>{id}</Code>,
+              filter: (
+                <TextInput
+                  label="Filtrer par ID"
+                  placeholder="4d95d650-473c-4b0f-a6da-d253806c8ada"
+                  leftSeciont={<Code>=</Code>}
+                  rightSection={
+                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                      <IconX />
+                    </ActionIcon>
+                  }
+                  value={filters.id}
+                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                  />
+              ),
+              filtering: filters.id !== "",
             },
             { accessor: "license_plate", title: "Immatriculation" },
             { accessor: "brand", title: "Marque" },
