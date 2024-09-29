@@ -332,7 +332,28 @@ def get_parking_statistics(parking_id: str) -> Dict[str, Any]:
             "reserved_spots": reserved_spots,
             "not_reserved_spots": not_reserved_spots,
             "car_brands": car_brands,
-            "cars_bad_parked": [car.to_dict() for car in cars_bad_parked],
+            "cars_bad_parked": [{
+                "id": car.id,
+                "brand": car.brand,
+                "color": car.color,
+                "license_plate": car.license_plate,
+                "owner": {
+                    "id": car.owner.id,
+                    "first_name": car.owner.first_name,
+                    "last_name": car.owner.last_name
+                },
+                "spot": {
+                    "id": car.spot.id,
+                    "tag": car.spot.tag,
+                    "owner": {
+                        "id": car.spot.subscription.person.id,
+                        "first_name": car.spot.subscription.person.first_name,
+                        "last_name": car.spot.subscription.person.last_name
+                    }
+                }
+            }
+            for car in cars_bad_parked],
+
             "levels": levels
         }
     }, 200

@@ -4,6 +4,7 @@ import { Flex, Loader, Stack, Text, Title } from "@mantine/core";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { PieChart, BarChart } from "@mantine/charts";
+import BadParkedTable from "../BadParkedTable";
 
 // Type pour les statistiques de parking
 interface ParkingStatistics {
@@ -16,6 +17,26 @@ interface ParkingStatistics {
   reserved_spots: number;
   not_reserved_spots: number;
   car_brands: Record<string, number>;
+  cars_bad_parked: {
+    id: string;
+    brand: string;
+    color: string;
+    license_plate: string;
+    owner: {
+      id: string;
+      first_name: string;
+      last_name: string;
+    },
+    spot: {
+      id: string;
+      tag: string;
+      owner: {
+        id: string;
+        first_name: string;
+        last_name: string;
+      }
+    }
+  }[];
 }
 
 // Type pour les propriétés du parking
@@ -57,7 +78,7 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
     <Stack>
       {error ? (
         <Flex h={"150px"} justify={"center"} align={"center"}>
-          <Text>Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
         </Flex>
       ) : (
         <>
@@ -88,6 +109,12 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
                   <Text ta={"center"}>Répartition des marques de voitures</Text>
                 </Stack>
               </Flex>
+              <Stack w={"100%"}>
+                <Title order={4}>
+                  Voitures mal garées
+                </Title>
+                <BadParkedTable data={statistics.cars_bad_parked} />
+              </Stack>
             </Stack>
           ) : (
             <Flex h={"150px"} justify={"center"} align={"center"}>

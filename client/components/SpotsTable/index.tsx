@@ -270,9 +270,9 @@ export default function SpotsTable({ parking }: Props) {
                       }}
                     >
                       {spots.find((spot) => spot.id === id)?.is_taken ? (
-                        <IconCarOff />
+                        <IconCarOff stroke={1.5} />
                       ) : (
-                        <IconCar />
+                        <IconCar stroke={1.5} />
                       )}
                     </ActionIcon>
                   </Tooltip>
@@ -287,7 +287,7 @@ export default function SpotsTable({ parking }: Props) {
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text>Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
         </Flex>
       )}
     </Stack>

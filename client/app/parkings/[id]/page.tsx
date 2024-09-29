@@ -1,22 +1,13 @@
 "use client";
 
 import {
-  AppShell,
-  Burger,
-  Button,
-  Skeleton,
   Stack,
-  Title,
-  Flex,
+  Title
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { IconArrowLeft } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
-import Link from "next/link";
-import BrandLogo from "@/components/BrandLogo";
 import SpotsTable from "@/components/SpotsTable";
-import styles from "@/styles/app/parkingsId.module.css";
 
 interface Parking {
   id: string;
@@ -58,73 +49,9 @@ export default function ParkingsId({
   }, [params.id]);
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 250,
-        breakpoint: "sm",
-        collapsed: { mobile: !appShellNavbarOpened },
-      }}
-    >
-      <AppShell.Header>
-        <Burger
-          opened={appShellNavbarOpened}
-          onClick={appShellNavbarToggle}
-          hiddenFrom="sm"
-          size="sm"
-          className={styles.appShellHeaderBurger}
-        />
-        <Flex justify="center" align="center" h="100%">
-          <BrandLogo width={100} />
-        </Flex>
-      </AppShell.Header>
-
-      <AppShell.Navbar>
-        <Stack p="md">
-          <Button
-            variant="transparent"
-            leftSection={<IconArrowLeft />}
-            component={Link}
-            href="/"
-          >
-            Retour à l'accueil
-          </Button>
-
-          <Title order={4} ta="center" p="md">
-            {parking?.name || error ? (
-              <>
-                {parking?.name}
-                {error && "--"}
-              </>
-            ) : (
-              <Skeleton w="100%" h={30} />
-            )}
-          </Title>
-
-          <Button>Places de parking</Button>
-          <Button
-            variant="transparent"
-            component={Link}
-            href={`/parkings/${params.id}/subscriptions`}
-          >
-            Abonnements
-          </Button>
-          <Button
-            variant="transparent"
-            component={Link}
-            href={`/parkings/${params.id}/statistics`}
-          >
-            Statistiques
-          </Button>
-        </Stack>
-      </AppShell.Navbar>
-
-      <AppShell.Main>
-        <Stack p="xl">
-          <Title order={2}>Liste des places de parking</Title>
-          <SpotsTable parking={parking} />
-        </Stack>
-      </AppShell.Main>
-    </AppShell>
+    <Stack p="xl">
+        <Title order={2}>Liste des places de parking</Title>
+        <SpotsTable parking={parking} />
+      </Stack>
   );
 }

@@ -164,7 +164,7 @@ export default function SubscriptionsTable({ parking }: Props) {
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text>Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
         </Flex>
       )}
     </Stack>
