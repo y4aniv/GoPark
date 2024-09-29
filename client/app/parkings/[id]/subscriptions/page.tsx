@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  Button,
+  Flex,
   Stack,
   Title
 } from "@mantine/core";
@@ -8,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import SubscriptionsTable from "@/components/SubscriptionsTable";
+import CreateSubscriptionDrawer from "@/components/CreateSubscriptionDrawer";
 
 interface Parking {
   id: string;
@@ -40,6 +43,7 @@ export default function ParkingIdSubscription({
           `${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`
         );
         setParking(response.data.parking);
+        setError(false);
       } catch (err) {
         setError(true);
       }
@@ -48,10 +52,20 @@ export default function ParkingIdSubscription({
     fetchParkingData();
   }, [params.id]);
 
+  const [createSubscriptionDrawerOpened, { open: openCreateSubscriptionDrawer, close: closeCreateSubscriptionDrawer }] = useDisclosure();
+
   return (
-    <Stack p="xl">
-      <Title order={2}>Liste des abonnements</Title>
-      <SubscriptionsTable parking={parking} />
-    </Stack>
+    <>
+      <CreateSubscriptionDrawer opened={createSubscriptionDrawerOpened} onClose={closeCreateSubscriptionDrawer} parking={parking} />
+      <Stack p="xl">
+        <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
+          <Title order={2}>Liste des abonnements</Title>
+            <Button onClick={openCreateSubscriptionDrawer}>
+              Ajouter un abonnement
+            </Button>
+        </Flex>
+        <SubscriptionsTable parking={parking} />
+      </Stack>
+    </>
   );
 }

@@ -29,6 +29,7 @@ export default function CarsTable() {
         setLoading(true);
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars`);
         setCars(response.data.cars);
+        setError(false);
       } catch (err) {
         setError(true);
       } finally {

@@ -40,6 +40,7 @@ export default function ParkingIdStatistics({
           `${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`
         );
         setParking(response.data.parking);
+        setError(false);
       } catch (err) {
         setError(true);
       }

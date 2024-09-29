@@ -65,6 +65,7 @@ export default function SubscriptionsTable({ parking }: Props) {
         .get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/subscriptions`)
         .then((response) => {
           setSubscriptions(response.data.subscriptions);
+          setError(false);
         })
         .catch(() => {
           setError(true);

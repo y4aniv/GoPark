@@ -1,7 +1,7 @@
 "use client";
 
 import BrandLogo from "@/components/BrandLogo";
-import { AppShell, Burger, Button, Flex, Skeleton, Stack, Title } from "@mantine/core";
+import { Alert, AppShell, Burger, Button, Divider, Flex, LoadingOverlay, Modal, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -9,6 +9,9 @@ import styles from "@/styles/app/parkingsId.module.css";
 import Link from "next/link";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { useRouter } from "next/navigation";
 
 interface Parking {
   id: string;
@@ -33,14 +36,17 @@ export default function ParkingsIdLayout({
   const [parking, setParking] = useState<Parking | null>(null);
   const [error, setError] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchParkingData = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`);
         setParking(response.data.parking);
+        setError(false);
       } catch {
         setError(true);
       }
@@ -56,6 +62,8 @@ export default function ParkingsIdLayout({
   const getButtonVariant = (url: string) => (currentUrl === url ? "filled" : "transparent");
 
   return (
+    <>
+    <LoadingOverlay visible={isDeleting} zIndex={10000000} overlayProps={{ color: "var(--mantine-color-dark)" }} />
     <AppShell
       header={{ height: 60 }}
       navbar={{
@@ -119,6 +127,35 @@ export default function ParkingsIdLayout({
           >
             Statistiques
           </Button>
+          <Divider />
+          <Button color="red" variant="subtle" onClick={()=>{
+            modals.openConfirmModal({
+              title: `Supprimer le parking ${parking?.name}`,
+              children: (
+               <Alert title={"Cette action est irréversible"}>
+                 Vous êtes sur le point de supprimer le parking {parking?.name} ainsi que toutes les ressources associées. Êtes-vous sûr de vouloir continuer ?
+                </Alert>
+              ),
+              labels: {
+                cancel: "Annuler",
+                confirm: "Supprimer"
+              },
+              onConfirm: async () => {
+                setIsDeleting(true);
+                try {
+                  await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}/delete`);
+                  router.push("/");
+                } catch {
+                  notifications.show({
+                    title: "Impossible de supprimer le parking",
+                    message: "Une erreur est survenue lors de la suppression du parking. Veuillez réessayer.",
+                  })
+                }
+              }
+            })
+          }}>
+            Supprimer le parking
+          </Button>
         </Stack>
       </AppShell.Navbar>
 
@@ -126,5 +163,6 @@ export default function ParkingsIdLayout({
         {children}
       </AppShell.Main>
     </AppShell>
+    </>
   );
 }

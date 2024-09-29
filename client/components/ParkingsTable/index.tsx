@@ -33,6 +33,7 @@ export default function ParkingsTable() {
         setLoading(true);
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings`);
         setParkings(response.data.parkings);
+        setError(false);
       } catch {
         setError(true);
       } finally {

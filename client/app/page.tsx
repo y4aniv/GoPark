@@ -1,30 +1,50 @@
 "use client";
 
-import { AppShell, Flex, Stack, Title } from "@mantine/core";
-
+import { AppShell, Button, Flex, Stack, Title } from "@mantine/core";
 import BrandLogo from "@/components/BrandLogo";
 import CarsTable from "@/components/CarsTable";
 import ParkingsTable from "@/components/ParkingsTable";
 import PersonsTable from "@/components/PersonsTable";
+import { useDisclosure } from "@mantine/hooks";
+import CreateParkingDrawer from "@/components/CreateParkingDrawer";
+import CreateCarDrawer from "@/components/CreateCarDrawer";
 
 export default function Root(): React.ReactElement {
+  const [createParkingDrawerOpened, { open: openCreateParkingDrawer, close: closeCreateParkingDrawer }] = useDisclosure();
+  const [createCarDrawerOpened, { open: openCreateCarDrawer, close: closeCreateCarDrawer }] = useDisclosure();
+
+
   return (
-    <AppShell header={{ height: 60 }}>
-      <AppShell.Header>
-        <Flex justify="center" align="center" h="100%">
-          <BrandLogo width={100} />
-        </Flex>
-      </AppShell.Header>
-      <AppShell.Main>
-        <Stack p="xl" gap="xl">
-          <Title order={2}>Liste des parkings</Title>
-          <ParkingsTable />
-          <Title order={2}>Liste des voitures</Title>
-          <CarsTable />
-          <Title order={2}>Liste des personnes</Title>
-          <PersonsTable />
-        </Stack>
-      </AppShell.Main>
-    </AppShell>
+    <>
+    <CreateParkingDrawer opened={createParkingDrawerOpened} onClose={closeCreateParkingDrawer} />
+    <CreateCarDrawer opened={createCarDrawerOpened} onClose={closeCreateCarDrawer} />
+      <AppShell header={{ height: 60 }}>
+        <AppShell.Header>
+          <Flex justify="center" align="center" h="100%">
+            <BrandLogo width={100} />
+          </Flex>
+        </AppShell.Header>
+        <AppShell.Main>
+          <Stack p="xl" gap="xl">
+            <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
+              <Title order={2}>Liste des parkings</Title>
+              <Button onClick={openCreateParkingDrawer}>
+                Ajouter un parking
+              </Button>
+            </Flex>
+            <ParkingsTable />
+            <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
+              <Title order={2}>Liste des voitures</Title>
+              <Button onClick={openCreateCarDrawer}>
+                Ajouter une voiture
+              </Button>
+            </Flex>
+            <CarsTable />
+            <Title order={2}>Liste des personnes</Title>
+            <PersonsTable />
+          </Stack>
+        </AppShell.Main>
+      </AppShell>
+    </>
   );
 }

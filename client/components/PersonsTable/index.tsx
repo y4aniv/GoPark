@@ -7,7 +7,6 @@ import axios from "axios";
 
 const PAGE_SIZE = 15;
 
-// Type pour représenter une personne
 interface Person {
   id: number;
   first_name: string;
@@ -28,6 +27,7 @@ export default function PersonsTable() {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/persons`);
         setPersons(response.data.persons);
+        setError(false);
       } catch {
         setError(true);
       } finally {

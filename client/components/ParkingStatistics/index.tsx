@@ -66,6 +66,7 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
         try {
           const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/statistics`);
           setStatistics(response.data.statistics);
+          setError(false);
         } catch {
           setError(true);
         }
@@ -85,10 +86,10 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
           {statistics ? (
             <Stack gap={"xl"} w={"100%"}>
               <Flex wrap={"wrap"} gap={"xl"} justify={"center"}>
-                <StatisticCard value={statistics.total_spots} label="Nombre de places" />
-                <StatisticCard value={statistics.total_cars} label="Nombre de voitures" />
-                <StatisticCard value={statistics.total_levels} label="Nombre d'étages" />
-                <StatisticCard value={statistics.total_subscriptions} label="Nombre d'abonnements" />
+                <StatisticCard value={statistics.total_spots} label="Places de parking" />
+                <StatisticCard value={statistics.total_cars} label="Voitures garées" />
+                <StatisticCard value={statistics.total_levels} label="Niveaux" />
+                <StatisticCard value={statistics.total_subscriptions} label="Abonnements" />
               </Flex>
               <Flex wrap={"wrap"} gap={"xl"} justify={"center"} w={"100%"}>
                 <PieChartSection value1={statistics.available_spots} label1="Places disponibles" value2={statistics.taken_spots} label2="Places prises" />
