@@ -3,12 +3,13 @@ import "@mantine/core/styles.layer.css";
 import "mantine-datatable/styles.layer.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import "@mantine/charts/styles.css";
 
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
-
-import type { Metadata } from "next";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "GoPark",
@@ -18,7 +19,7 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) : React.ReactElement {
   return (
     <html lang="fr">
       <head>
@@ -32,7 +33,7 @@ export default function RootLayout({
             fontFamily: "var(--font-family)",
           }}
         >
-          <Notifications autoClose={3000} position={"top-right"} />
+          <Notifications autoClose={3000} position="top-right" />
           <ModalsProvider>{children}</ModalsProvider>
         </MantineProvider>
       </body>

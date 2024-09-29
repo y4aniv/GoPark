@@ -1,4 +1,4 @@
-from utils.uuid import uuidV4
+from utils.uuid import uuid_v4
 from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
@@ -10,26 +10,26 @@ if TYPE_CHECKING:
 class Spot(Base):
     __tablename__ = 'spots'
     
-    id = Column(String, primary_key=True)
-    level = Column(Integer, nullable=False)
-    spot = Column(Integer, nullable=False)
-    tag = Column(String, nullable=False)
-    is_taken = Column(Boolean, nullable=False)
+    id: str = Column(String, primary_key=True)
+    level: int = Column(Integer, nullable=False)
+    spot: int = Column(Integer, nullable=False)
+    tag: str = Column(String, nullable=False)
+    is_taken: bool = Column(Boolean, nullable=False)
 
-    parking_id = Column(String, ForeignKey('parkings.id'))
+    parking_id: str = Column(String, ForeignKey('parkings.id'))
     parking = relationship('Parking', back_populates='spots', uselist=False, enable_typechecks=False)
 
-    car_id = Column(String, ForeignKey('cars.id'))
+    car_id: str = Column(String, ForeignKey('cars.id'))
     car = relationship('Car', back_populates='spot', uselist=False, enable_typechecks=False, foreign_keys=[car_id])
 
     subscription = relationship('Subscription', back_populates='spot', uselist=False, enable_typechecks=False)
-    
+
     def __init__(
             self, 
             level: int,
             spot: int,
             parking: 'Parking'
-        ) ->  None:
+        ) -> None:
         """
         Initialisation de la classe Spot.
 
@@ -38,13 +38,12 @@ class Spot(Base):
         - spot (int) : Numéro de la place.
         - parking (Parking) : Parking où se trouve la place, représenté par une instance de la classe Parking.
         """
-
-        self.id: str = uuidV4()
+        self.id = uuid_v4()
         self.level = level
         self.spot = spot
         self.parking = parking
-        self.tag: str = f"{level}{str(spot).zfill(len(str(parking.spots_per_level)))}"
-        self.is_taken: bool = False
+        self.tag = f"{level}{str(spot).zfill(len(str(parking.spots_per_level)))}"
+        self.is_taken = False
         self.car: Optional['Car'] = None
         self.subscription: Optional['Subscription'] = None
 
@@ -55,7 +54,6 @@ class Spot(Base):
         Sortie :
         - dict : Dictionnaire contenant les informations de l'objet.
         """
-
         return {
             "id": self.id,
             "level": self.level,

@@ -14,7 +14,6 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-
 import { DataTable } from "mantine-datatable";
 import { IconCar, IconCarOff } from "@tabler/icons-react";
 import axios from "axios";
@@ -23,42 +22,43 @@ import { notifications } from "@mantine/notifications";
 
 const PAGE_SIZE = 15;
 
-export default function SpotsTable({
-  parking,
-}: {
-  parking: {
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    zip_code: string;
-    levels: number;
-    spots_per_level: number;
-    spots: string[];
-    subscriptions: string[];
-  } | null;
-}) {
-  const [level, setLevel] = useState<string>("0");
-  const [spots, setSpots] = useState<
-    {
-      id: string;
-      level: number;
-      spot: number;
-      tag: string;
-      car: {
-        id: string | null;
-        license_plate: string | null
-      };
-      is_taken: boolean;
-      parking: string;
-      subscription: string | null;
-    }[]
-  >([]);
-  const [error, setError] = useState(false);
-  const [page, setPage] = useState(1);
-  const [records, setRecords] = useState(spots.slice(0, PAGE_SIZE));
-  const [loading, setLoading] = useState(true);
+interface Parking {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  zip_code: string;
+  levels: number;
+  spots_per_level: number;
+  spots: string[];
+  subscriptions: string[];
+}
 
+interface Spot {
+  id: string;
+  level: number;
+  spot: number;
+  tag: string;
+  car: {
+    id: string | null;
+    license_plate: string | null;
+  };
+  is_taken: boolean;
+  parking: string;
+  subscription: string | null;
+}
+
+interface Props {
+  parking: Parking | null;
+}
+
+export default function SpotsTable({ parking }: Props) {
+  const [level, setLevel] = useState<string>("0");
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [error, setError] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [records, setRecords] = useState<Spot[]>(spots.slice(0, PAGE_SIZE));
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setPage(1);
@@ -69,18 +69,13 @@ export default function SpotsTable({
     if (parking) {
       setLoading(true);
       axios
-        .get(
-          `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots?level=${level}`
-        )
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/spots?level=${level}`)
         .then((response) => {
           setSpots(response.data.spots);
+          setError(false);
         })
-        .catch(() => {
-          setError(true);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+        .catch(() => setError(true))
+        .finally(() => setLoading(false));
     }
   }, [level, parking]);
 
@@ -90,8 +85,8 @@ export default function SpotsTable({
     setRecords(spots.slice(from, to));
   }, [page, spots]);
 
-  function openParkCarModal(id: string) {
-    var licensePlateInput = "";
+  const openParkCarModal = (id: string) => {
+    let licensePlateInput = "";
 
     modals.openConfirmModal({
       title: "Garer une voiture",
@@ -101,14 +96,14 @@ export default function SpotsTable({
       },
       children: (
         <Stack>
-          <TextInput label={"Nom du parking"} value={parking?.name} disabled />
+          <TextInput label="Nom du parking" value={parking?.name} disabled />
           <TextInput
-            label={"Tag de la place"}
+            label="Tag de la place"
             value={spots.find((spot) => spot.id === id)?.tag}
             disabled
           />
           <TextInput
-            label={"Immatriculation de la voiture"}
+            label="Immatriculation de la voiture"
             onChange={(event) => {
               licensePlateInput = event.currentTarget.value;
             }}
@@ -124,14 +119,14 @@ export default function SpotsTable({
             }
           )
           .then((response) => {
-            setSpots(
-              spots.map((spot) =>
+            setSpots((prevSpots) =>
+              prevSpots.map((spot) =>
                 spot.id === id
                   ? {
                       ...spot,
                       car: {
                         id: response.data.car.id,
-                        license_plate: response.data.car.license_plate
+                        license_plate: response.data.car.license_plate,
                       },
                       is_taken: true,
                     }
@@ -139,71 +134,12 @@ export default function SpotsTable({
               )
             );
           })
-          .catch((err) => {
-            switch (err.response.data.message) {
-              case "PARKING_NOT_FOUND":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "Le parking n'a pas été trouvé. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-
-              case "SPOT_NOT_FOUND":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "La place n'a pas été trouvée. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-
-              case "NO_DATA":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "Veuillez remplir tous les champs.",
-                  color: "red",
-                });
-                break;
-
-              case "CAR_NOT_FOUND":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message:
-                    "La voiture n'a pas été trouvée. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-
-              case "CAR_ALREADY_PARKED":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "La voiture est déjà garée.",
-                  color: "red",
-                });
-                break;
-
-              case "SPOT_ALREADY_TAKEN":
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "La place est déjà occupée.",
-                  color: "red",
-                });
-                break;
-
-              default:
-                notifications.show({
-                  title: "Impossible de garer la voiture",
-                  message: "Une erreur est survenue. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-            }
-          });
+          .catch((err) => handleError(err, "garer"));
       },
     });
-  }
+  };
 
-  function openUnparkCarModal(id: string) {
+  const openUnparkCarModal = (id: string) => {
     modals.openConfirmModal({
       title: "Retirer une voiture",
       labels: {
@@ -212,188 +148,148 @@ export default function SpotsTable({
       },
       children: (
         <Stack>
-          <TextInput label={"Nom du parking"} value={parking?.name} disabled />
+          <TextInput label="Nom du parking" value={parking?.name} disabled />
           <TextInput
-            label={"Tag de la place"}
+            label="Tag de la place"
             value={spots.find((spot) => spot.id === id)?.tag}
             disabled
           />
           <TextInput
-            label={"Immatriculation de la voiture"}
+            label="Immatriculation de la voiture"
             value={spots.find((spot) => spot.id === id)?.car.license_plate ?? ""}
             disabled
           />
         </Stack>
       ),
       onConfirm: () => {
-          axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots/${id}/unpark`
-          ).then(() => {
-            setSpots(
-              spots.map((spot) =>
+        axios
+          .post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots/${id}/unpark`)
+          .then(() => {
+            setSpots((prevSpots) =>
+              prevSpots.map((spot) =>
                 spot.id === id
-                  ? {
-                      ...spot,
-                      car: {
-                        id: null,
-                        license_plate: null
-                      },
-                      is_taken: false,
-                    }
+                  ? { ...spot, car: { id: null, license_plate: null }, is_taken: false }
                   : spot
               )
             );
           })
-          .catch((err) => {
-            switch (err.response.data.message) {
-              case "PARKING_NOT_FOUND":
-                notifications.show({
-                  title: "Impossible de retirer la voiture",
-                  message: "Le parking n'a pas été trouvé. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-
-              case "SPOT_NOT_FOUND":
-                notifications.show({
-                  title: "Impossible de retirer la voiture",
-                  message: "La place n'a pas été trouvée. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-
-              case "SPOT_NOT_TAKEN":
-                notifications.show({
-                  title: "Impossible de retirer la voiture",
-                  message: "Cette place n'est pas prise.",
-                  color: "red",
-                });
-                break;
-              default:
-                notifications.show({
-                  title: "Impossible de retirer la voiture",
-                  message: "Une erreur est survenue. Veuillez réessayer.",
-                  color: "red",
-                });
-                break;
-            }
-          });
-      }
+          .catch((err) => handleError(err, "retirer"));
+      },
     });
-  }
+  };
+
+  const handleError = (err: any, action: string) => {
+    const errorMessages: Record<string, string> = {
+      PARKING_NOT_FOUND: "Le parking n'a pas été trouvé. Veuillez réessayer.",
+      SPOT_NOT_FOUND: "La place n'a pas été trouvée. Veuillez réessayer.",
+      NO_DATA: "Veuillez remplir tous les champs.",
+      CAR_NOT_FOUND: "La voiture n'a pas été trouvée. Veuillez réessayer.",
+      CAR_ALREADY_PARKED: "La voiture est déjà garée.",
+      SPOT_ALREADY_TAKEN: "La place est déjà occupée.",
+      SPOT_NOT_TAKEN: "Cette place n'est pas prise.",
+    };
+
+    notifications.show({
+      title: `Impossible de ${action} la voiture`,
+      message: errorMessages[err.response.data.message] || "Une erreur est survenue. Veuillez réessayer.",
+    });
+  };
 
   return (
-    <>
-      <Stack>
-        <Select
-          label={"Niveau"}
-          placeholder={"Sélectionner un niveau"}
-          data={[
-            { value: "0", label: "Niveau 0" },
-            ...(parking?.levels
-              ? Array.from({ length: parking.levels - 1 }, (_, i) => ({
-                  value: (i + 1).toString(),
-                  label: `Niveau ${i + 1}`,
-                }))
-              : []),
-          ]}
-          defaultValue={"0"}
-          disabled={!parking}
-          onChange={(value) => setLevel(value as string)}
-        />
-        {!error ? (
-          <DataTable
-            records={records}
-            minHeight={150}
-            noRecordsText={"Aucun parking trouvé"}
-            loadingText={"Chargement..."}
-            fetching={loading}
-            columns={[
-              {
-                accessor: "id",
-                title: "#",
-                render: ({ id }) => <Code>{id}</Code>,
-              },
-              {
-                accessor: "tag",
-                title: "Tag",
-              },
-              {
-                accessor: "is_taken",
-                title: "Occupé",
-                render: ({ is_taken }) =>
-                  is_taken ? (
-                    <Badge color={"red"}>{"Oui"}</Badge>
-                  ) : (
-                    <Badge>{"Non"}</Badge>
-                  ),
-              },
-              {
-                accessor: "subscription",
-                title: "Réservé",
-                render: ({ subscription }) =>
-                  subscription ? (
-                    <Badge color={"green"}>{"Oui"}</Badge>
-                  ) : (
-                    <Badge>{"Non"}</Badge>
-                  ),
-              },
-              {
-                accessor: "car",
-                title: "Voiture",
-                render: ({ car }) =>
-                  car.id ? (
-                    <Text>{car.license_plate}</Text>
-                  ) : (
-                    <Text>{"-"}</Text>
-                  )
-              },
-              {
-                accessor: "subscription",
-                title: "Abonnement",
-                render: ({ subscription }) =>
-                  subscription ? (
-                    <Code>{subscription}</Code>
-                  ) : (
-                    <Text>{"-"}</Text>
-                  ),
-              },
-              {
-                accessor: "actions",
-                title: "Actions",
-                render: ({ id }) => (
-                  <Group wrap={"nowrap"}>
-                    <Tooltip label={spots.find(spot => spot.id === id)?.is_taken ? "Retirer la voiture" : "Garer une voiture"}>
-                      <ActionIcon
-                      variant={"white"}
+    <Stack>
+      <Select
+        label="Niveau"
+        placeholder="Sélectionner un niveau"
+        data={[
+          { value: "0", label: "Niveau 0" },
+          ...(parking?.levels
+            ? Array.from({ length: parking.levels - 1 }, (_, i) => ({
+                value: (i + 1).toString(),
+                label: `Niveau ${i + 1}`,
+              }))
+            : []),
+        ]}
+        defaultValue="0"
+        disabled={!parking}
+        onChange={(value) => setLevel(value as string)}
+      />
+      {!error ? (
+        <DataTable
+          records={records}
+          minHeight={150}
+          noRecordsText="Aucun parking trouvé"
+          loadingText="Chargement..."
+          fetching={loading}
+          columns={[
+            {
+              accessor: "id",
+              title: "#",
+              render: ({ id }) => <Code>{id}</Code>,
+            },
+            {
+              accessor: "tag",
+              title: "Tag",
+            },
+            {
+              accessor: "is_taken",
+              title: "Occupé",
+              render: ({ is_taken }) => (
+                <Badge color={is_taken ? "red" : undefined}>{is_taken ? "Oui" : "Non"}</Badge>
+              ),
+            },
+            {
+              accessor: "subscription",
+              title: "Réservé",
+              render: ({ subscription }) => (
+                <Badge color={subscription ? "green" : undefined}>{subscription ? "Oui" : "Non"}</Badge>
+              ),
+            },
+            {
+              accessor: "car",
+              title: "Voiture",
+              render: ({ car }) => <Text>{car.id ? car.license_plate : "-"}</Text>,
+            },
+            {
+              accessor: "subscription",
+              title: "Abonnement",
+              render: ({ subscription }) => <Code>{subscription ?? "-"}</Code>,
+            },
+            {
+              accessor: "actions",
+              title: "Actions",
+              render: ({ id }) => (
+                <Group wrap="nowrap">
+                  <Tooltip
+                    label={spots.find((spot) => spot.id === id)?.is_taken ? "Retirer la voiture" : "Garer une voiture"}
+                  >
+                    <ActionIcon
+                      variant="white"
                       onClick={() => {
-                        if (!spots.find(spot => spot.id === id)?.is_taken) {
-                          openParkCarModal(id);
-                        }else{
-                          openUnparkCarModal(id);
-                        }
+                        const isTaken = spots.find((spot) => spot.id === id)?.is_taken;
+                        isTaken ? openUnparkCarModal(id) : openParkCarModal(id);
                       }}
-                      >
-                      {spots.find(spot => spot.id === id)?.is_taken ? <IconCarOff /> : <IconCar />}
-                      </ActionIcon>
-                    </Tooltip>
-                  </Group>
-                ),
-              },
-            ]}
-            totalRecords={spots.length - 1}
-            recordsPerPage={PAGE_SIZE}
-            page={page}
-            onPageChange={setPage}
-          />
-        ) : (
-          <Flex h={"150px"} justify={"center"} align={"center"}>
-            <Text>
-              {"Une erreur est survenue lors du chargement des données"}
-            </Text>
-          </Flex>
-        )}
-      </Stack>
-    </>
+                    >
+                      {spots.find((spot) => spot.id === id)?.is_taken ? (
+                        <IconCarOff />
+                      ) : (
+                        <IconCar />
+                      )}
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+              ),
+            },
+          ]}
+          totalRecords={spots.length}
+          recordsPerPage={PAGE_SIZE}
+          page={page}
+          onPageChange={setPage}
+        />
+      ) : (
+        <Flex h="150px" justify="center" align="center">
+          <Text>Une erreur est survenue lors du chargement des données</Text>
+        </Flex>
+      )}
+    </Stack>
   );
 }

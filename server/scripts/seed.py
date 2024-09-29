@@ -1,7 +1,6 @@
 import os
-from utils.sqlalchemy import Base, engine
+from utils.sqlalchemy import Base, engine, session
 from classes import Parking, Person, Car, Subscription
-from utils.sqlalchemy import session
 from random import randint, choice
 
 
@@ -11,11 +10,10 @@ def reset_database():
     """
     Supprime et recrée toutes les tables de la base de données.
     """
-    
     print("[?] Dropping tables")
     Base.metadata.drop_all(engine)
     print("[+] Tables dropped\n")
-    
+
     print("[?] Creating tables")
     Base.metadata.create_all(engine)
     print("[+] Tables created\n")
@@ -24,52 +22,58 @@ def create_parkings():
     """
     Seed la base de données avec des parkings.
     """
-
     print("[?] Creating parkings")
-    Parking(
-        name="Parking République",
-        address="12 Avenue de la République",
-        zip_code="75011",
-        city="Paris",
-        levels=3,
-        spots_per_level=50
-    ).save(session)
 
-    Parking(
-        name="Parking Centre Commercial Atlantis",
-        address="Rue de la Durantière",
-        zip_code="44800",
-        city="Saint-Herblain",
-        levels=5,
-        spots_per_level=100
-    ).save(session)
+    parkings_data = [
+        {
+            "name": "Parking République",
+            "address": "12 Avenue de la République",
+            "zip_code": "75011",
+            "city": "Paris",
+            "levels": 3,
+            "spots_per_level": 50
+        },
+        {
+            "name": "Parking Centre Commercial Atlantis",
+            "address": "Rue de la Durantière",
+            "zip_code": "44800",
+            "city": "Saint-Herblain",
+            "levels": 5,
+            "spots_per_level": 100
+        },
+        {
+            "name": "Parking Aéroport Charles de Gaulle P1",
+            "address": "Route des Badauds",
+            "zip_code": "95700",
+            "city": "Roissy-en-France",
+            "levels": 8,
+            "spots_per_level": 200
+        }
+    ]
 
-    Parking(
-        name="Parking Aéroport Charles de Gaulle P1",
-        address="Route des Badauds",
-        zip_code="95700",
-        city="Roissy-en-France",
-        levels=8,
-        spots_per_level=200
-    ).save(session)
+    for parking_data in parkings_data:
+        Parking(**parking_data).save(session)
+
     print("[+] Parkings created \n")
 
 def create_persons():
     """
     Seed la base de données avec des personnes.
     """
-
     print("[?] Creating persons")
-    first_names_path = os.path.join(SCRIPT_DIR, 'datasets', 'persons','first_names.txt')
-    last_names_path = os.path.join(SCRIPT_DIR, 'datasets', 'persons','last_names.txt')
+    first_names_path = os.path.join(SCRIPT_DIR, 'datasets', 'persons', 'first_names.txt')
+    last_names_path = os.path.join(SCRIPT_DIR, 'datasets', 'persons', 'last_names.txt')
 
-    first_names = open(first_names_path, "r").read().split("\n")
-    last_names = open(last_names_path, "r").read().split("\n")
+    with open(first_names_path, "r") as f:
+        first_names = f.read().splitlines()
 
-    for i in range(600):
+    with open(last_names_path, "r") as f:
+        last_names = f.read().splitlines()
+
+    for _ in range(600):
         Person(
-            first_name=first_names[i % randint(1, len(first_names))],
-            last_name=last_names[i % randint(1, len(last_names))],
+            first_name=choice(first_names),
+            last_name=choice(last_names),
             birth_date=f"{randint(1950, 2000)}-{randint(1, 12):02d}-{randint(1, 28):02d}"
         ).save(session)
 
@@ -79,19 +83,22 @@ def create_cars():
     """
     Seed la base de données avec des voitures.
     """
-
     print("[?] Creating cars")
-    brands_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars','brands.txt')
-    models_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars','models.txt')
-    colors_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars','colors.txt')
-    
-    brands = open(brands_path, "r").read().split("\n")
-    models = open(models_path, "r").read().split("\n")
-    colors = open(colors_path, "r").read().split("\n")
+    brands_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars', 'brands.txt')
+    models_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars', 'models.txt')
+    colors_path = os.path.join(SCRIPT_DIR, 'datasets', 'cars', 'colors.txt')
+
+    with open(brands_path, "r") as f:
+        brands = f.read().splitlines()
+
+    with open(models_path, "r") as f:
+        models = f.read().splitlines()
+
+    with open(colors_path, "r") as f:
+        colors = f.read().splitlines()
 
     for person in session.query(Person).all():
-        has_two_cars = randint(0, 1)
-        for i in range(2 if has_two_cars else 1):
+        for _ in range(randint(1, 2)):  # 1 ou 2 voitures par personne
             Car(
                 license_plate=f"{chr(randint(65, 90))}{chr(randint(65, 90))}{randint(100, 999)}{chr(randint(65, 90))}{chr(randint(65, 90))}",
                 brand=choice(brands),
@@ -99,26 +106,23 @@ def create_cars():
                 color=choice(colors),
                 owner=person
             ).save(session)
-    
+
     print("[+] Cars created\n")
-    
+
 def park_cars():
     """
     Seed la base de données avec des voitures garées.
     """
-    
     print("[?] Parking cars")
     parkings = session.query(Parking).all()
     cars = session.query(Car).all()
 
-    for i in range(450):
-        car = cars[i]
-        spot = choice(choice(parkings).get_available_spots())
+    for car in cars[:450]:  # Ne pas dépasser le nombre de voitures
+        available_parking = choice(parkings)
+        spot = choice(available_parking.get_available_spots())
 
-        if not spot:
-            continue
-        
-        car.park(spot)
+        if spot:  # Si un spot est disponible
+            car.park(spot)
 
     print("[+] Cars parked\n")
 
@@ -126,37 +130,29 @@ def create_subscriptions():
     """
     Seed la base de données avec des abonnements.
     """
-    
     print("[?] Creating subscriptions")
     persons = session.query(Person).all()
     parkings = session.query(Parking).all()
 
-    for i in range(250):
-        person = persons[i]
+    for _ in range(250):
+        person = choice(persons)
         parking = choice(parkings)
 
         if not parking.get_available_spot():
             continue
 
-        spot = choice(parking.spots)
+        spot = choice(parking.get_available_spots())
 
-        if spot.subscription:
-            continue
+        if not spot.subscription:  # Si le spot n'est pas déjà réservé
+            subscription = Subscription(person=person, parking=parking, spot=spot)
+            person.subscriptions.append(subscription)
+            parking.subscriptions.append(subscription)
+            spot.subscription = subscription
+            
+            person.save(session)
+            parking.save(session)
+            spot.save(session)
 
-        subscription = Subscription(
-            person=person,
-            parking=parking,
-            spot=spot
-        )
-
-        person.subscriptions.append(subscription)
-        parking.subscriptions.append(subscription)
-        spot.subscription = subscription
-        
-        person.save(session)
-        parking.save(session)
-        spot.save(session)
-    
     print("[+] Subscriptions created\n")
 
 if __name__ == "__main__":

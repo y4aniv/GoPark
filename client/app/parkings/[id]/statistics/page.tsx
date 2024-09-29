@@ -15,7 +15,7 @@ import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
-import SubscriptionsTable from "@/components/SubscriptionsTable";
+import ParkingStatistics from "@/components/ParkingStatistics";
 import styles from "@/styles/app/parkingsId.module.css";
 
 interface Parking {
@@ -32,7 +32,7 @@ interface Parking {
 
 const PAGE_SIZE = 15;
 
-export default function ParkingIdSubscription({
+export default function ParkingIdStatistics({
   params,
 }: {
   params: { id: string };
@@ -101,20 +101,20 @@ export default function ParkingIdSubscription({
             )}
           </Title>
 
-          <Button variant="transparent" component={Link} href={`/parkings/${params.id}`}>
+          <Button variant="transparent" component={Link} href={`/parkings/${params.id}/`}>
             Places de parking
           </Button>
-          <Button>Abonnements</Button>
-          <Button variant="transparent" component={Link} href={`/parkings/${params.id}/statistics`}>
-            Statistiques
+          <Button variant="transparent" component={Link} href={`/parkings/${params.id}/subscriptions`}>
+            Abonnements
           </Button>
+          <Button>Statistiques</Button>
         </Stack>
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Stack p="xl">
-          <Title order={2}>Liste des abonnements</Title>
-          <SubscriptionsTable parking={parking} />
+          <Title order={2}>Statistiques</Title>
+          <ParkingStatistics parking={parking} />
         </Stack>
       </AppShell.Main>
     </AppShell>

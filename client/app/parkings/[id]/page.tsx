@@ -4,60 +4,58 @@ import {
   AppShell,
   Burger,
   Button,
-  Card,
-  Code,
-  Container,
-  Flex,
-  Group,
-  Select,
   Skeleton,
   Stack,
   Title,
+  Flex,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-
-import BrandLogo from "@/components/BrandLogo";
 import { IconArrowLeft } from "@tabler/icons-react";
-import Link from "next/link";
-import SpotsTable from "@/components/SpotsTable";
-import axios from "axios";
-import styles from "@/styles/app/parkingsId.module.css";
 import { useDisclosure } from "@mantine/hooks";
+import axios from "axios";
+import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
+import SpotsTable from "@/components/SpotsTable";
+import styles from "@/styles/app/parkingsId.module.css";
+
+interface Parking {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  zip_code: string;
+  levels: number;
+  spots_per_level: number;
+  spots: string[];
+  subscriptions: string[];
+}
 
 const PAGE_SIZE = 15;
 
 export default function ParkingsId({
   params,
 }: {
-  params: {
-    id: string;
-  };
-}): React.ReactNode {
-  const [AppShellNavbarOpened, { toggle: AppShellNavbarToggle }] =
-    useDisclosure();
-  const [parking, setParking] = useState<{
-    id: string;
-    name: string;
-    address: string;
-    city: string;
-    zip_code: string;
-    levels: number;
-    spots_per_level: number;
-    spots: string[];
-    subscriptions: string[];
-  } | null>(null);
+  params: { id: string };
+}): React.ReactElement {
+  const [appShellNavbarOpened, { toggle: appShellNavbarToggle }] =
+    useDisclosure(false);
+  const [parking, setParking] = useState<Parking | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`)
-      .then((response) => {
+    const fetchParkingData = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/parkings/${params.id}`
+        );
         setParking(response.data.parking);
-      })
-      .catch(() => {
+      } catch (err) {
         setError(true);
-      });
-  }, []);
+      }
+    };
+
+    fetchParkingData();
+  }, [params.id]);
 
   return (
     <AppShell
@@ -65,47 +63,65 @@ export default function ParkingsId({
       navbar={{
         width: 250,
         breakpoint: "sm",
-        collapsed: { mobile: !AppShellNavbarOpened },
+        collapsed: { mobile: !appShellNavbarOpened },
       }}
     >
       <AppShell.Header>
         <Burger
-          opened={AppShellNavbarOpened}
-          onClick={AppShellNavbarToggle}
+          opened={appShellNavbarOpened}
+          onClick={appShellNavbarToggle}
           hiddenFrom="sm"
           size="sm"
-          className={styles.AppShellHeader__Burger}
+          className={styles.appShellHeaderBurger}
         />
-        <Flex justify="center" align="center" h={"100%"}>
+        <Flex justify="center" align="center" h="100%">
           <BrandLogo width={100} />
         </Flex>
       </AppShell.Header>
+
       <AppShell.Navbar>
-        <Stack p={"md"}>
-        <Button variant={"transparent"} leftSection={<IconArrowLeft />} component="a" href={"/"}>
-            {"Retour à l'accueil"}
+        <Stack p="md">
+          <Button
+            variant="transparent"
+            leftSection={<IconArrowLeft />}
+            component={Link}
+            href="/"
+          >
+            Retour à l'accueil
           </Button>
-            <Title order={4} ta={"center"} p={"md"}>
-              {parking?.name || error ? (
-                <>
-                  {parking?.name}
-                  {error && "--"}
-                </>
-              ) : (
-                <Skeleton w={"100%"} h={30} />
-              )}
-            </Title>
-          <Button>
-            {"Places de parking"}
+
+          <Title order={4} ta="center" p="md">
+            {parking?.name || error ? (
+              <>
+                {parking?.name}
+                {error && "--"}
+              </>
+            ) : (
+              <Skeleton w="100%" h={30} />
+            )}
+          </Title>
+
+          <Button>Places de parking</Button>
+          <Button
+            variant="transparent"
+            component={Link}
+            href={`/parkings/${params.id}/subscriptions`}
+          >
+            Abonnements
           </Button>
-          <Button  variant={"transparent"} component="a" href={`/parkings/${params.id}/subscriptions`}>
-            {"Abonnements"}
+          <Button
+            variant="transparent"
+            component={Link}
+            href={`/parkings/${params.id}/statistics`}
+          >
+            Statistiques
           </Button>
         </Stack>
       </AppShell.Navbar>
+
       <AppShell.Main>
-        <Stack p={"xl"}>
-          <Title order={2}>{"Liste des places de parking"}</Title>
+        <Stack p="xl">
+          <Title order={2}>Liste des places de parking</Title>
           <SpotsTable parking={parking} />
         </Stack>
       </AppShell.Main>

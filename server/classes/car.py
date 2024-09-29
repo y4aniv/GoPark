@@ -1,4 +1,4 @@
-from utils.uuid import uuidV4
+from utils.uuid import uuid_v4
 from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
@@ -10,22 +10,21 @@ if TYPE_CHECKING:
 class Car(Base):
     __tablename__ = 'cars'
     
-    id = Column(String, primary_key=True)
-    license_plate = Column(String, nullable=False)
-    brand = Column(String, nullable=False)
-    model = Column(String, nullable=False)
-    color = Column(String, nullable=False)
-
-    owner_id = Column(String, ForeignKey('persons.id'))
+    id: str = Column(String, primary_key=True)
+    license_plate: str = Column(String, nullable=False)
+    brand: str = Column(String, nullable=False)
+    model: str = Column(String, nullable=False)
+    color: str = Column(String, nullable=False)
+    
+    owner_id: str = Column(String, ForeignKey('persons.id'))
     owner = relationship('Person', back_populates='cars', uselist=False, enable_typechecks=False)
-
     spot = relationship('Spot', back_populates='car', enable_typechecks=False, uselist=False)
 
     def __init__(
             self,
             license_plate: str,
             brand: str,
-            model: str, 
+            model: str,
             color: str,
             owner: 'Person'
         ) -> None:
@@ -40,7 +39,7 @@ class Car(Base):
         - owner (Person) : Propriétaire du véhicule, représenté par une instance de la classe Person.
         """
         
-        self.id: str = uuidV4()
+        self.id = uuid_v4()
         self.license_plate = license_plate
         self.brand = brand
         self.model = model
@@ -57,7 +56,6 @@ class Car(Base):
         Sortie :
         - dict : Dictionnaire contenant les informations de l'objet.
         """
-
         return {
             "id": self.id,
             "license_plate": self.license_plate,
@@ -67,7 +65,7 @@ class Car(Base):
             "owner": self.owner.id,
             "spot": self.spot.id if self.spot else None
         }
-    
+
     def park(self, spot: 'Spot') -> 'Car':
         """
         Gare la voiture dans une place de parking.
@@ -85,7 +83,7 @@ class Car(Base):
         self.save(session)
 
         return self
-    
+
     def unpark(self) -> 'Car':
         """
         Désactive la place de parking de la voiture.
@@ -93,10 +91,22 @@ class Car(Base):
         Sortie :
         - Car : Voiture désactivée.
         """
-        self.spot.is_taken = False
-        self.spot.car = None
-        self.spot = None
+        if self.spot:
+            self.spot.is_taken = False
+            self.spot.car = None
+            self.spot = None
 
-        self.save(session)
+            self.save(session)
 
         return self
+
+    def is_bad_parked(self) -> bool:
+        """
+        Vérifie si la voiture est garée sur une place réservée.
+
+        Sortie :
+        - bool : True si la voiture est mal garée, False sinon.
+        """
+        return (self.spot is not None and self.spot.is_taken and 
+                self.spot.subscription and 
+                self.spot.subscription.person != self.owner)

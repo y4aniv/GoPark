@@ -6,13 +6,14 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.session import Session as SessionType
     from sqlalchemy.ext.declarative import DeclarativeMeta
 
+# Uncomment the following line to use PostgreSQL
 # engine = create_engine('postgresql://avnadmin:AVNS_oqFmHm2dnaUYVb9RUdR@gopark-nursesync.i.aivencloud.com:20305/defaultdb?sslmode=require')
 engine = create_engine('sqlite:///defaultdb.db')
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
 Base = declarative_base()
-Base.metadata.create_all(engine)
 
 def __repr__(self) -> str:
     """
@@ -21,7 +22,7 @@ def __repr__(self) -> str:
     Sortie :
     - str : Représentation de l'objet
     """
-    return f"<{self.__class__.__name__} {self.id}>"
+    return f"<{self.__class__.__name__} id={self.id}>"
 
 def save(self, session: 'SessionType') -> 'DeclarativeMeta':
     """
@@ -37,5 +38,9 @@ def save(self, session: 'SessionType') -> 'DeclarativeMeta':
     session.commit()
     return self
 
+# Assigning the methods to Base
 Base.__repr__ = __repr__
 Base.save = save
+
+# Create all tables in the database
+Base.metadata.create_all(engine)
