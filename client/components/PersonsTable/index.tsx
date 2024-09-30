@@ -16,12 +16,15 @@ interface Person {
   birth_date: string; // ISO 8601 format
 }
 
-export default function PersonsTable() {
-  const [persons, setPersons] = useState<Person[]>([]);
+export default function PersonsTable({
+  persons,
+  error,
+}: {
+  persons: Person[];
+  error: boolean;
+}) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Person[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
   const [filters, setFilters] = useState<{
     id: string;
     firstName: string;
@@ -36,23 +39,6 @@ export default function PersonsTable() {
     lastName: "",
     birthDate: [null, null]
   });
-
-  useEffect(() => {
-    const fetchPersons = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/persons`);
-        setPersons(response.data.persons);
-        setError(false);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPersons();
-  }, []);
 
   useEffect(() => {
     const from = (page - 1) * PAGE_SIZE;
@@ -80,7 +66,7 @@ export default function PersonsTable() {
           minHeight={150}
           noRecordsText={"Aucune personne trouvée"}
           loadingText={"Chargement..."}
-          fetching={loading}
+          fetching={persons.length === 0}
           columns={[
             {
               accessor: "id",

@@ -11,21 +11,19 @@ import colors from "@/data/colors.json";
 interface CreateCarDrawerProps {
     opened: boolean;
     onClose: () => void;
+    cars: any;
+    setCars: (cars: any) => void;
+    persons: any;
 }
 
 export default function CreateCarDrawer({
     opened,
     onClose,
+    cars,
+    setCars,
+    persons,
 }: CreateCarDrawerProps): React.ReactElement {
     const [loading, setLoading] = useState<boolean>(false);
-    const [persons, setPersons] = useState<{
-      id: string;
-      first_name: string;
-      last_name: string;
-      birth_date: string;
-      cars: string[];
-      subscriptions: string[];
-    }[] | null>([]);
       
     const form = useForm({
         initialValues: {
@@ -45,13 +43,6 @@ export default function CreateCarDrawer({
         }
     })
 
-    useEffect(() => {
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/persons`)
-        .then((response) => {
-          setPersons(response.data.persons);
-        })
-    }, []);
-
     const router = useRouter();
 
     return (
@@ -67,7 +58,11 @@ export default function CreateCarDrawer({
               owner: form.values.owner,
             })
             onClose();
-            router.refresh(); // TODO: Find a better way to refresh the page
+            notifications.show({
+              title: "Voiture créée",
+              message: `La voiture avec la plaque d'immatriculation "${response.data.car.license_plate}" a été créée avec succès`,
+            });
+            setCars([...cars, response.data.car].sort((a: any, b: any) => a.license_plate.localeCompare(b.license_plate)));
           }catch (error: any) {
             switch (error.response.data.message){
               case "CAR_ALREADY_EXISTS":
@@ -121,7 +116,7 @@ export default function CreateCarDrawer({
               key={form.key("owner")}
               {...form.getInputProps("owner")}
               data={
-                persons?.map((person) => ({
+                persons?.map((person: any) => ({
                   value: person.id,
                   label: `${person.first_name} ${person.last_name} - ${new Date(person.birth_date).toLocaleDateString()}`,
                 })) || []

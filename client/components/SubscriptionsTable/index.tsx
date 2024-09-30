@@ -49,37 +49,19 @@ interface Subscription {
 
 interface Props {
   parking: Parking | null;
+  subscriptions: Subscription[];
+  setSubscriptions: (subscriptions: Subscription[]) => void;
+  error: boolean;
 }
 
-export default function SubscriptionsTable({ parking }: Props) {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [error, setError] = useState<boolean>(false);
+export default function SubscriptionsTable({ parking, subscriptions, error, setSubscriptions }: Props) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Subscription[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<{ 
     id: string;
     spot: string;
     person: string;
   }>({ id: "", spot: "", person: "" });
-
-  useEffect(() => {
-    if (parking) {
-      setLoading(true);
-      axios
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/subscriptions`)
-        .then((response) => {
-          setSubscriptions(response.data.subscriptions);
-          setError(false);
-        })
-        .catch(() => {
-          setError(true);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [parking]);
 
   useEffect(() => {
     const from = (page - 1) * PAGE_SIZE;
@@ -122,7 +104,7 @@ export default function SubscriptionsTable({ parking }: Props) {
         axios
           .post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/subscriptions/${subscriptionId}/delete`)
           .then(() => {
-            setSubscriptions((prev) => prev.filter(s => s.id !== subscriptionId));
+            setSubscriptions(subscriptions.filter((s) => s.id !== subscriptionId));
           })
           .catch(() => {
             notifications.show({
@@ -142,7 +124,7 @@ export default function SubscriptionsTable({ parking }: Props) {
           minHeight={150}
           noRecordsText="Aucun abonnement trouvé"
           loadingText="Chargement..."
-          fetching={loading}
+          fetching={subscriptions.length === 0}
           columns={[
             {
               accessor: "id",

@@ -8,11 +8,15 @@ import { useRouter } from "next/navigation";
 interface CreateParkingDrawerProps {
     opened: boolean;
     onClose: () => void;
+    parkings: any;
+    setParkings: (parkings: any) => void;
 }
 
 export default function CreateParkingDrawer({
     opened,
     onClose,
+    parkings,
+    setParkings,
 }: CreateParkingDrawerProps): React.ReactElement {
     const [loading, setLoading] = useState<boolean>(false);
       
@@ -54,7 +58,17 @@ export default function CreateParkingDrawer({
               spotsPerLevel: form.values.spotsPerLevel,
             })
 
-            router.push(`/parkings/${response.data.parking.id}`);
+            notifications.show({
+              title: "Parking créé",
+              message: `Le parking "${response.data.parking.name}" a été créé avec succès`,
+            })
+
+            onClose();
+
+            setParkings([...parkings, {
+              ...response.data.parking,
+              available_spots: response.data.parking.levels * response.data.parking.spots_per_level,
+            }].sort((a, b) => a.name.localeCompare(b.name)));
             
           } catch (error: any) {
             switch (error.response.data.message){

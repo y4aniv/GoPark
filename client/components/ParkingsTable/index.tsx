@@ -20,12 +20,15 @@ interface Parking {
   available_spots: number;
 }
 
-export default function ParkingsTable() {
-  const [parkings, setParkings] = useState<Parking[]>([]);
+export default function ParkingsTable({
+  parkings,
+  error
+}: {
+  parkings: Parking[];
+  error: boolean;
+}) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Parking[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
   const [filters, setFilters] = useState<{ 
     id: string, 
     name: string, 
@@ -35,22 +38,6 @@ export default function ParkingsTable() {
     capacity: number,
   }>({ id: "", name: "", address: "", zipCode: "", availableSpots: 0, capacity: 0 });
 
-  useEffect(() => {
-    const fetchParkings = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings`);
-        setParkings(response.data.parkings);
-        setError(false);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchParkings();
-  }, []);
 
   useEffect(() => {
     const from = (page - 1) * PAGE_SIZE;
@@ -80,7 +67,7 @@ export default function ParkingsTable() {
           minHeight={150}
           noRecordsText="Aucun parking trouvé"
           loadingText="Chargement..."
-          fetching={loading}
+          fetching={parkings.length === 0}
           columns={[
             {
               accessor: "id",

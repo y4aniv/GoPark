@@ -499,7 +499,18 @@ def create_subscription(parking_id: str) -> Dict[str, Any]:
 
     return {
         "status": "success",
-        "subscription": subscription.to_dict()
+        "subscription": {
+            "id": subscription.id,
+            "person": {
+                "id": person.id,
+                "first_name": person.first_name,
+                "last_name": person.last_name
+            },
+            "spot": {
+                "id": spot.id,
+                "tag": spot.tag
+            }
+        }
     }, 201
 
 @server.post("/api/parkings/<parking_id>/subscriptions/<subscription_id>/delete")

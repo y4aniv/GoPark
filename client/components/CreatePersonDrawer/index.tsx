@@ -9,11 +9,15 @@ import { DateInput } from "@mantine/dates";
 interface CreatePersonDrawerProps {
     opened: boolean;
     onClose: () => void;
+    persons: any;
+    setPersons: (persons: any) => void;
 }
 
 export default function CreatePersonDrawer({
     opened,
     onClose,
+    persons,
+    setPersons,
 }: CreatePersonDrawerProps): React.ReactElement {
     const [loading, setLoading] = useState<boolean>(false);
       
@@ -38,12 +42,16 @@ export default function CreatePersonDrawer({
           try {
             setLoading(true);
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/persons/create`, form.values)
+            notifications.show({
+              title: "Personne créée",
+              message: `La personne "${response.data.person.first_name} ${response.data.person.last_name}" a été créée avec succès`,
+            });
             onClose();
+            setPersons([...persons, response.data.person].sort((a, b) => a.first_name.localeCompare(b.first_name)));
           } catch (error: any) {
             notifications.show({
               title: "Impossible de créer la personne",
               message: `Une erreur est survenue lors de la création de la personne : ${error?.response?.data?.message ?? "UNKNOWN_ERROR"}`,
-              color: "red",
             });
           }finally{
             setLoading(false);

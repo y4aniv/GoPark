@@ -5,6 +5,19 @@ import { useForm } from '@mantine/form';
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 
+interface Subscription {
+  id: string;
+  person: {
+    id: string;
+    first_name: string;
+    last_name: string;
+  };
+  spot: {
+    id: string;
+    tag: string;
+  };
+}
+
 interface CreateSubscriptionDrawerProps {
     opened: boolean;
     onClose: () => void;
@@ -19,12 +32,16 @@ interface CreateSubscriptionDrawerProps {
         spots: string[];
         subscriptions: string[];
     } | null;
+    subscriptions: Subscription[];
+    setSubscriptions: (subscriptions: Subscription[]) => void;
 }
 
 export default function CreateSubscriptionDrawer({
     opened,
     onClose,
     parking,
+    subscriptions,
+    setSubscriptions,
 }: CreateSubscriptionDrawerProps): React.ReactElement {
     const [loading, setLoading] = useState<boolean>(false);
     const [spots, setSpots] = useState<{
@@ -77,12 +94,23 @@ export default function CreateSubscriptionDrawer({
         <form onSubmit={form.onSubmit(async() => {
           try {
             setLoading(true);
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/subscriptions/create`, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/subscriptions/create`, {
               spot: form.values.spot,
               owner: form.values.owner,
             })
+            
             onClose();
-            router.refresh(); // TODO: Find a better way to refresh the page
+            
+            notifications.show({
+              title: "Abonnement créé",
+              message: `L'abonnement pour la place ${form.values.spot} a été créé avec succès`,
+            })
+
+            setSubscriptions([
+              ...subscriptions,
+              response.data.subscription
+            ].sort((a, b) => a.spot.tag.localeCompare(b.spot.tag)));
+
           } catch (error: any) {
             notifications.show({
               title: "Impossible de créer l'abonnement",
