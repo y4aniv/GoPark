@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  Stack,
-  Title,
-} from "@mantine/core";
+import { Stack, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
@@ -51,8 +48,8 @@ export default function ParkingIdStatistics({
 
   return (
     <Stack p="xl">
-          <Title order={2}>Statistiques</Title>
-          <ParkingStatistics parking={parking} />
-        </Stack>
+      <Title order={2}>Statistiques</Title>
+      <ParkingStatistics parking={parking} />
+    </Stack>
   );
 }

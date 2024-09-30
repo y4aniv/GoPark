@@ -1,6 +1,14 @@
 "use client";
 
-import { ActionIcon, Flex, NumberInput, Stack, Text, TextInput, Code } from "@mantine/core";
+import {
+  ActionIcon,
+  Flex,
+  NumberInput,
+  Stack,
+  Text,
+  TextInput,
+  Code,
+} from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
 import Link from "next/link";
@@ -22,22 +30,28 @@ interface Parking {
 
 export default function ParkingsTable({
   parkings,
-  error
+  error,
 }: {
   parkings: Parking[];
   error: boolean;
 }) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Parking[]>([]);
-  const [filters, setFilters] = useState<{ 
-    id: string, 
-    name: string, 
-    address: string, 
-    zipCode: string,
-    availableSpots: number,
-    capacity: number,
-  }>({ id: "", name: "", address: "", zipCode: "", availableSpots: 0, capacity: 0 });
-
+  const [filters, setFilters] = useState<{
+    id: string;
+    name: string;
+    address: string;
+    zipCode: string;
+    availableSpots: number;
+    capacity: number;
+  }>({
+    id: "",
+    name: "",
+    address: "",
+    zipCode: "",
+    availableSpots: 0,
+    capacity: 0,
+  });
 
   useEffect(() => {
     const from = (page - 1) * PAGE_SIZE;
@@ -45,18 +59,30 @@ export default function ParkingsTable({
     setRecords(parkings.slice(from, to));
   }, [page, parkings]);
 
-  useEffect(()=>{
-    setRecords(parkings.filter((parking) => {
-      return (
-        (filters.id === "" || parking.id.toString().includes(filters.id)) &&
-        (filters.name === "" || parking.name.toLowerCase().includes(filters.name.toLowerCase())) &&
-        (filters.address === "" || parking.address.toLowerCase().includes(filters.address.toLowerCase())) &&
-        (filters.zipCode === "" || parking.zip_code.includes(filters.zipCode)) &&
-        (filters.availableSpots === 0 || parking.available_spots >= filters.availableSpots) &&
-        (filters.capacity === 0 || parking.levels * parking.spots_per_level >= filters.capacity)
-      );
-    }).slice(0, PAGE_SIZE)
-  )
+  useEffect(() => {
+    setRecords(
+      parkings
+        .filter((parking) => {
+          return (
+            (filters.id === "" || parking.id.toString().includes(filters.id)) &&
+            (filters.name === "" ||
+              parking.name
+                .toLowerCase()
+                .includes(filters.name.toLowerCase())) &&
+            (filters.address === "" ||
+              parking.address
+                .toLowerCase()
+                .includes(filters.address.toLowerCase())) &&
+            (filters.zipCode === "" ||
+              parking.zip_code.includes(filters.zipCode)) &&
+            (filters.availableSpots === 0 ||
+              parking.available_spots >= filters.availableSpots) &&
+            (filters.capacity === 0 ||
+              parking.levels * parking.spots_per_level >= filters.capacity)
+          );
+        })
+        .slice(0, PAGE_SIZE)
+    );
   }, [filters, parkings]);
 
   return (
@@ -83,18 +109,24 @@ export default function ParkingsTable({
                   placeholder="c8157290-8740-4b5a-b2e4-616c5ef8cfe8"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, id: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.id}
-                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, id: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.id !== "",
             },
-            { 
-              accessor: "name", 
+            {
+              accessor: "name",
               title: "Nom",
               filter: (
                 <TextInput
@@ -102,17 +134,23 @@ export default function ParkingsTable({
                   placeholder="Parking des Champs Elysées"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, name: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, name: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.name}
-                  onChange={(event) => setFilters({ ...filters, name: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, name: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.name !== "",
-             },
-            { 
+            },
+            {
               accessor: "address",
               title: "Adresse",
               filter: (
@@ -121,12 +159,21 @@ export default function ParkingsTable({
                   placeholder="Avenue des Champs Elysées"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, address: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, address: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.address}
-                  onChange={(event) => setFilters({ ...filters, address: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({
+                      ...filters,
+                      address: event.currentTarget.value,
+                    })
+                  }
                 />
               ),
               filtering: filters.address !== "",
@@ -145,12 +192,21 @@ export default function ParkingsTable({
                   placeholder="Paris, 75008"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, zipCode: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, zipCode: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.zipCode}
-                  onChange={(event) => setFilters({ ...filters, zipCode: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({
+                      ...filters,
+                      zipCode: event.currentTarget.value,
+                    })
+                  }
                 />
               ),
               filtering: filters.zipCode !== "",
@@ -167,7 +223,13 @@ export default function ParkingsTable({
                   placeholder="10"
                   leftSection={<Code>{">="}</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, availableSpots: 0 })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() =>
+                        setFilters({ ...filters, availableSpots: 0 })
+                      }
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
@@ -176,7 +238,10 @@ export default function ParkingsTable({
                     if (value === "" || typeof value === "string") {
                       setFilters({ ...filters, availableSpots: 0 });
                     } else {
-                      setFilters({ ...filters, availableSpots: parseInt(value.toString(), 10) });
+                      setFilters({
+                        ...filters,
+                        availableSpots: parseInt(value.toString(), 10),
+                      });
                     }
                   }}
                   min={0}
@@ -196,7 +261,11 @@ export default function ParkingsTable({
                   placeholder="1000"
                   leftSection={<Code>{">="}</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, capacity: 0 })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, capacity: 0 })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
@@ -205,7 +274,10 @@ export default function ParkingsTable({
                     if (value === "" || typeof value === "string") {
                       setFilters({ ...filters, capacity: 0 });
                     } else {
-                      setFilters({ ...filters, capacity: value ? parseInt(value.toString(), 10) : 0 });
+                      setFilters({
+                        ...filters,
+                        capacity: value ? parseInt(value.toString(), 10) : 0,
+                      });
                     }
                   }}
                   min={0}
@@ -220,7 +292,9 @@ export default function ParkingsTable({
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">
+            Une erreur est survenue lors du chargement des données
+          </Text>
         </Flex>
       )}
     </Stack>

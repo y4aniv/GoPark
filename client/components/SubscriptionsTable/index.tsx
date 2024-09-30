@@ -54,10 +54,15 @@ interface Props {
   error: boolean;
 }
 
-export default function SubscriptionsTable({ parking, subscriptions, error, setSubscriptions }: Props) {
+export default function SubscriptionsTable({
+  parking,
+  subscriptions,
+  error,
+  setSubscriptions,
+}: Props) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Subscription[]>([]);
-  const [filters, setFilters] = useState<{ 
+  const [filters, setFilters] = useState<{
     id: string;
     spot: string;
     person: string;
@@ -74,8 +79,14 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
       subscriptions.filter((subscription) => {
         return (
           (filters.id === "" || subscription.id.includes(filters.id)) &&
-          (filters.spot === "" || subscription.spot.tag.toLowerCase().includes(filters.spot.toLowerCase())) &&
-          (filters.person === "" || `${subscription.person.first_name} ${subscription.person.last_name}`.toLowerCase().includes(filters.person.toLowerCase()))
+          (filters.spot === "" ||
+            subscription.spot.tag
+              .toLowerCase()
+              .includes(filters.spot.toLowerCase())) &&
+          (filters.person === "" ||
+            `${subscription.person.first_name} ${subscription.person.last_name}`
+              .toLowerCase()
+              .includes(filters.person.toLowerCase()))
         );
       })
     );
@@ -83,7 +94,7 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
 
   const openConfirmModal = (subscriptionId: string) => {
     const subscription = subscriptions.find((s) => s.id === subscriptionId);
-    
+
     if (!subscription) return;
 
     modals.openConfirmModal({
@@ -96,20 +107,29 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
         <Stack>
           <TextInput label="Nom du parking" value={parking?.name} disabled />
           <TextInput label="Place" value={subscription.spot.tag} disabled />
-          <TextInput label="Personne" value={`${subscription.person.first_name} ${subscription.person.last_name}`} disabled />
+          <TextInput
+            label="Personne"
+            value={`${subscription.person.first_name} ${subscription.person.last_name}`}
+            disabled
+          />
           <TextInput label="Abonnement" value={subscriptionId} disabled />
         </Stack>
       ),
       onConfirm: () => {
         axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/subscriptions/${subscriptionId}/delete`)
+          .post(
+            `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/subscriptions/${subscriptionId}/delete`
+          )
           .then(() => {
-            setSubscriptions(subscriptions.filter((s) => s.id !== subscriptionId));
+            setSubscriptions(
+              subscriptions.filter((s) => s.id !== subscriptionId)
+            );
           })
           .catch(() => {
             notifications.show({
               title: "Impossible de supprimer l'abonnement",
-              message: "Une erreur est survenue lors de la suppression de l'abonnement",
+              message:
+                "Une erreur est survenue lors de la suppression de l'abonnement",
             });
           });
       },
@@ -136,12 +156,18 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
                   placeholder="c78b71aa-836f-49d3-a61a-236bf86c5f38"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, id: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.id}
-                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, id: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.id !== "",
@@ -156,12 +182,18 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
                   placeholder="A1"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, spot: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, spot: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.spot}
-                  onChange={(event) => setFilters({ ...filters, spot: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, spot: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.spot !== "",
@@ -178,12 +210,21 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
                   placeholder="John Doe"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, person: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, person: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.person}
-                  onChange={(event) => setFilters({ ...filters, person: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({
+                      ...filters,
+                      person: event.currentTarget.value,
+                    })
+                  }
                 />
               ),
               filtering: filters.person !== "",
@@ -194,7 +235,10 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
               render: ({ id }) => (
                 <Group wrap="nowrap">
                   <Tooltip label="Supprimer l'abonnement">
-                    <ActionIcon variant="white" onClick={() => openConfirmModal(id)}>
+                    <ActionIcon
+                      variant="white"
+                      onClick={() => openConfirmModal(id)}
+                    >
                       <IconTrash />
                     </ActionIcon>
                   </Tooltip>
@@ -209,7 +253,9 @@ export default function SubscriptionsTable({ parking, subscriptions, error, setS
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">
+            Une erreur est survenue lors du chargement des données
+          </Text>
         </Flex>
       )}
     </Stack>

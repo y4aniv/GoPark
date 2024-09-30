@@ -26,7 +26,7 @@ interface ParkingStatistics {
       id: string;
       first_name: string;
       last_name: string;
-    },
+    };
     spot: {
       id: string;
       tag: string;
@@ -34,8 +34,8 @@ interface ParkingStatistics {
         id: string;
         first_name: string;
         last_name: string;
-      }
-    }
+      };
+    };
   }[];
 }
 
@@ -64,7 +64,9 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
     if (parking) {
       const fetchStatistics = async () => {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/statistics`);
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/statistics`
+          );
           setStatistics(response.data.statistics);
           setError(false);
         } catch {
@@ -79,21 +81,45 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
     <Stack>
       {error ? (
         <Flex h={"150px"} justify={"center"} align={"center"}>
-          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">
+            Une erreur est survenue lors du chargement des données
+          </Text>
         </Flex>
       ) : (
         <>
           {statistics ? (
             <Stack gap={"xl"} w={"100%"}>
               <Flex wrap={"wrap"} gap={"xl"} justify={"center"}>
-                <StatisticCard value={statistics.total_spots} label="Places de parking" />
-                <StatisticCard value={statistics.total_cars} label="Voitures garées" />
-                <StatisticCard value={statistics.total_levels} label="Niveaux" />
-                <StatisticCard value={statistics.total_subscriptions} label="Abonnements" />
+                <StatisticCard
+                  value={statistics.total_spots}
+                  label="Places de parking"
+                />
+                <StatisticCard
+                  value={statistics.total_cars}
+                  label="Voitures garées"
+                />
+                <StatisticCard
+                  value={statistics.total_levels}
+                  label="Niveaux"
+                />
+                <StatisticCard
+                  value={statistics.total_subscriptions}
+                  label="Abonnements"
+                />
               </Flex>
               <Flex wrap={"wrap"} gap={"xl"} justify={"center"} w={"100%"}>
-                <PieChartSection value1={statistics.available_spots} label1="Places disponibles" value2={statistics.taken_spots} label2="Places prises" />
-                <PieChartSection value1={statistics.reserved_spots} label1="Places réservées" value2={statistics.not_reserved_spots} label2="Places non réservées" />
+                <PieChartSection
+                  value1={statistics.available_spots}
+                  label1="Places disponibles"
+                  value2={statistics.taken_spots}
+                  label2="Places prises"
+                />
+                <PieChartSection
+                  value1={statistics.reserved_spots}
+                  label1="Places réservées"
+                  value2={statistics.not_reserved_spots}
+                  label2="Places non réservées"
+                />
               </Flex>
               <Flex wrap={"wrap"} gap={"xl"} justify={"center"} w={"100%"}>
                 <Stack w={"100%"}>
@@ -105,15 +131,19 @@ export default function ParkingStatistics({ parking }: ParkingStatisticsProps) {
                       .map(([brand, count]) => ({ brand, count }))
                       .sort((a, b) => a.count - b.count)}
                     dataKey="brand"
-                    series={[{ name: "count", color: "dark", label: "Nombre de voitures" }]}
+                    series={[
+                      {
+                        name: "count",
+                        color: "dark",
+                        label: "Nombre de voitures",
+                      },
+                    ]}
                   />
                   <Text ta={"center"}>Répartition des marques de voitures</Text>
                 </Stack>
               </Flex>
               <Stack w={"100%"}>
-                <Title order={4}>
-                  Voitures mal garées
-                </Title>
+                <Title order={4}>Voitures mal garées</Title>
                 <BadParkedTable data={statistics.cars_bad_parked} />
               </Stack>
             </Stack>
@@ -137,7 +167,17 @@ function StatisticCard({ value, label }: { value: number; label: string }) {
   );
 }
 
-function PieChartSection({ value1, label1, value2, label2 }: { value1: number; label1: string; value2: number; label2: string }) {
+function PieChartSection({
+  value1,
+  label1,
+  value2,
+  label2,
+}: {
+  value1: number;
+  label1: string;
+  value2: number;
+  label2: string;
+}) {
   return (
     <Stack>
       <PieChart

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Flex,
-  Stack,
-  Title
-} from "@mantine/core";
+import { Button, Flex, Stack, Title } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
@@ -41,18 +36,20 @@ export default function ParkingIdSubscription({
     parkings: false,
     subscriptions: false,
   });
-  const [subscriptions, setSubscriptions] = useState<{
-    id: string;
-    person: {
+  const [subscriptions, setSubscriptions] = useState<
+    {
       id: string;
-      first_name: string;
-      last_name: string;
-    };
-    spot: {
-      id: string;
-      tag: string;
-    };
-  }[]>([]);
+      person: {
+        id: string;
+        first_name: string;
+        last_name: string;
+      };
+      spot: {
+        id: string;
+        tag: string;
+      };
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchParkingData = async () => {
@@ -63,7 +60,7 @@ export default function ParkingIdSubscription({
         setParking(response.data.parking);
         setErrors({ ...errors, parkings: false });
       } catch (err) {
-        setErrors({...errors, parkings: true});
+        setErrors({ ...errors, parkings: true });
       }
     };
 
@@ -79,26 +76,43 @@ export default function ParkingIdSubscription({
         setSubscriptions(response.data.subscriptions);
         setErrors({ ...errors, subscriptions: false });
       } catch (err) {
-        setErrors({...errors, subscriptions: true});
+        setErrors({ ...errors, subscriptions: true });
       }
     };
 
     fetchSubscriptionsData();
   }, [params.id]);
 
-  const [createSubscriptionDrawerOpened, { open: openCreateSubscriptionDrawer, close: closeCreateSubscriptionDrawer }] = useDisclosure();
+  const [
+    createSubscriptionDrawerOpened,
+    {
+      open: openCreateSubscriptionDrawer,
+      close: closeCreateSubscriptionDrawer,
+    },
+  ] = useDisclosure();
 
   return (
     <>
-      <CreateSubscriptionDrawer opened={createSubscriptionDrawerOpened} onClose={closeCreateSubscriptionDrawer} parking={parking} subscriptions={subscriptions} setSubscriptions={setSubscriptions} />
+      <CreateSubscriptionDrawer
+        opened={createSubscriptionDrawerOpened}
+        onClose={closeCreateSubscriptionDrawer}
+        parking={parking}
+        subscriptions={subscriptions}
+        setSubscriptions={setSubscriptions}
+      />
       <Stack p="xl">
         <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
           <Title order={2}>Liste des abonnements</Title>
-            <Button onClick={openCreateSubscriptionDrawer}>
-              Ajouter un abonnement
-            </Button>
+          <Button onClick={openCreateSubscriptionDrawer}>
+            Ajouter un abonnement
+          </Button>
         </Flex>
-        <SubscriptionsTable parking={parking} subscriptions={subscriptions} setSubscriptions={setSubscriptions} error={errors.subscriptions} />
+        <SubscriptionsTable
+          parking={parking}
+          subscriptions={subscriptions}
+          setSubscriptions={setSubscriptions}
+          error={errors.subscriptions}
+        />
       </Stack>
     </>
   );

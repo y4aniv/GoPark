@@ -59,13 +59,13 @@ export default function SpotsTable({ parking }: Props) {
   const [page, setPage] = useState<number>(1);
   const [records, setRecords] = useState<Spot[]>(spots.slice(0, PAGE_SIZE));
   const [loading, setLoading] = useState<boolean>(true);
-  const [filters, setFilters] = useState<{ 
-    id: string,
-    tag: string,
-    is_taken: boolean | null,
-    is_reserved: boolean | null,
-    car: string,
-    subscription: string,
+  const [filters, setFilters] = useState<{
+    id: string;
+    tag: string;
+    is_taken: boolean | null;
+    is_reserved: boolean | null;
+    car: string;
+    subscription: string;
   }>({
     id: "",
     tag: "",
@@ -84,7 +84,9 @@ export default function SpotsTable({ parking }: Props) {
     if (parking) {
       setLoading(true);
       axios
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/spots?level=${level}`)
+        .get(
+          `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking.id}/spots?level=${level}`
+        )
         .then((response) => {
           setSpots(response.data.spots);
           setError(false);
@@ -101,17 +103,24 @@ export default function SpotsTable({ parking }: Props) {
   }, [page, spots]);
 
   useEffect(() => {
-    setRecords(spots.filter((spot) => {
-      console.log(spot.subscription, filters.subscription);
-      return (
-        (filters.id === "" || spot.id.includes(filters.id)) &&
-        (filters.tag === "" || spot.tag.includes(filters.tag)) &&
-        (filters.is_taken === null || spot.is_taken === filters.is_taken) &&
-        (filters.is_reserved === null || !!spot.subscription === filters.is_reserved) &&
-        (filters.car === "" || spot.car.license_plate?.includes(filters.car)) &&
-        (filters.subscription === "" || spot.subscription?.includes(filters.subscription))
-      );
-    }).slice(0, PAGE_SIZE));
+    setRecords(
+      spots
+        .filter((spot) => {
+          console.log(spot.subscription, filters.subscription);
+          return (
+            (filters.id === "" || spot.id.includes(filters.id)) &&
+            (filters.tag === "" || spot.tag.includes(filters.tag)) &&
+            (filters.is_taken === null || spot.is_taken === filters.is_taken) &&
+            (filters.is_reserved === null ||
+              !!spot.subscription === filters.is_reserved) &&
+            (filters.car === "" ||
+              spot.car.license_plate?.includes(filters.car)) &&
+            (filters.subscription === "" ||
+              spot.subscription?.includes(filters.subscription))
+          );
+        })
+        .slice(0, PAGE_SIZE)
+    );
   }, [filters, spots]);
 
   const openParkCarModal = (id: string) => {
@@ -185,19 +194,27 @@ export default function SpotsTable({ parking }: Props) {
           />
           <TextInput
             label="Immatriculation de la voiture"
-            value={spots.find((spot) => spot.id === id)?.car.license_plate ?? ""}
+            value={
+              spots.find((spot) => spot.id === id)?.car.license_plate ?? ""
+            }
             disabled
           />
         </Stack>
       ),
       onConfirm: () => {
         axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots/${id}/unpark`)
+          .post(
+            `${process.env.NEXT_PUBLIC_API_URL}/parkings/${parking?.id}/spots/${id}/unpark`
+          )
           .then(() => {
             setSpots((prevSpots) =>
               prevSpots.map((spot) =>
                 spot.id === id
-                  ? { ...spot, car: { id: null, license_plate: null }, is_taken: false }
+                  ? {
+                      ...spot,
+                      car: { id: null, license_plate: null },
+                      is_taken: false,
+                    }
                   : spot
               )
             );
@@ -220,7 +237,9 @@ export default function SpotsTable({ parking }: Props) {
 
     notifications.show({
       title: `Impossible de ${action} la voiture`,
-      message: errorMessages[err.response.data.message] || "Une erreur est survenue. Veuillez réessayer.",
+      message:
+        errorMessages[err.response.data.message] ||
+        "Une erreur est survenue. Veuillez réessayer.",
     });
   };
 
@@ -260,12 +279,18 @@ export default function SpotsTable({ parking }: Props) {
                   placeholder="b84fc92b-5c30-4fbb-be84-7a35af1bd2d3"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, id: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, id: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.id}
-                  onChange={(event) => setFilters({ ...filters, id: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, id: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.id !== "",
@@ -279,12 +304,18 @@ export default function SpotsTable({ parking }: Props) {
                   placeholder="1042"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, tag: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, tag: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.tag}
-                  onChange={(event) => setFilters({ ...filters, tag: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, tag: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.tag !== "",
@@ -293,7 +324,9 @@ export default function SpotsTable({ parking }: Props) {
               accessor: "is_taken",
               title: "Occupé",
               render: ({ is_taken }) => (
-                <Badge color={is_taken ? "red" : undefined}>{is_taken ? "Oui" : "Non"}</Badge>
+                <Badge color={is_taken ? "red" : undefined}>
+                  {is_taken ? "Oui" : "Non"}
+                </Badge>
               ),
               filter: (
                 <Select
@@ -304,8 +337,15 @@ export default function SpotsTable({ parking }: Props) {
                     { value: "false", label: "Libre" },
                     { value: "", label: "Toutes" },
                   ]}
-                  onChange={(value) => setFilters({ ...filters, is_taken: value === "" ? null : value === "true" })}
-                  value={filters.is_taken === null ? "" : filters.is_taken.toString()}
+                  onChange={(value) =>
+                    setFilters({
+                      ...filters,
+                      is_taken: value === "" ? null : value === "true",
+                    })
+                  }
+                  value={
+                    filters.is_taken === null ? "" : filters.is_taken.toString()
+                  }
                   defaultValue=""
                 />
               ),
@@ -315,7 +355,9 @@ export default function SpotsTable({ parking }: Props) {
               accessor: "subscription",
               title: "Réservé",
               render: ({ subscription }) => (
-                <Badge color={subscription ? "green" : undefined}>{subscription ? "Oui" : "Non"}</Badge>
+                <Badge color={subscription ? "green" : undefined}>
+                  {subscription ? "Oui" : "Non"}
+                </Badge>
               ),
               filter: (
                 <Select
@@ -327,9 +369,16 @@ export default function SpotsTable({ parking }: Props) {
                     { value: "", label: "Toutes" },
                   ]}
                   onChange={(value) =>
-                    setFilters({ ...filters, is_reserved: value === "" ? null : value === "true" })
+                    setFilters({
+                      ...filters,
+                      is_reserved: value === "" ? null : value === "true",
+                    })
                   }
-                  value={filters.is_reserved === null ? "" : filters.is_reserved.toString()}
+                  value={
+                    filters.is_reserved === null
+                      ? ""
+                      : filters.is_reserved.toString()
+                  }
                   defaultValue=""
                 />
               ),
@@ -338,19 +387,27 @@ export default function SpotsTable({ parking }: Props) {
             {
               accessor: "car",
               title: "Voiture",
-              render: ({ car }) => <Text>{car.id ? car.license_plate : "-"}</Text>,
+              render: ({ car }) => (
+                <Text>{car.id ? car.license_plate : "-"}</Text>
+              ),
               filter: (
                 <TextInput
                   label="Filtrer par immatriculation"
                   placeholder="AB-123-CD"
                   leftSection={<Code>=</Code>}
                   rightSection={
-                    <ActionIcon size={"sm"} onClick={() => setFilters({ ...filters, car: "" })} variant="transparent">
+                    <ActionIcon
+                      size={"sm"}
+                      onClick={() => setFilters({ ...filters, car: "" })}
+                      variant="transparent"
+                    >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.car}
-                  onChange={(event) => setFilters({ ...filters, car: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({ ...filters, car: event.currentTarget.value })
+                  }
                 />
               ),
               filtering: filters.car !== "",
@@ -367,14 +424,21 @@ export default function SpotsTable({ parking }: Props) {
                   rightSection={
                     <ActionIcon
                       size={"sm"}
-                      onClick={() => setFilters({ ...filters, subscription: "" })}
+                      onClick={() =>
+                        setFilters({ ...filters, subscription: "" })
+                      }
                       variant="transparent"
                     >
                       <IconX />
                     </ActionIcon>
                   }
                   value={filters.subscription}
-                  onChange={(event) => setFilters({ ...filters, subscription: event.currentTarget.value })}
+                  onChange={(event) =>
+                    setFilters({
+                      ...filters,
+                      subscription: event.currentTarget.value,
+                    })
+                  }
                 />
               ),
               filtering: filters.subscription !== "",
@@ -385,12 +449,18 @@ export default function SpotsTable({ parking }: Props) {
               render: ({ id }) => (
                 <Group wrap="nowrap">
                   <Tooltip
-                    label={spots.find((spot) => spot.id === id)?.is_taken ? "Retirer la voiture" : "Garer une voiture"}
+                    label={
+                      spots.find((spot) => spot.id === id)?.is_taken
+                        ? "Retirer la voiture"
+                        : "Garer une voiture"
+                    }
                   >
                     <ActionIcon
                       variant="white"
                       onClick={() => {
-                        const isTaken = spots.find((spot) => spot.id === id)?.is_taken;
+                        const isTaken = spots.find(
+                          (spot) => spot.id === id
+                        )?.is_taken;
                         isTaken ? openUnparkCarModal(id) : openParkCarModal(id);
                       }}
                     >
@@ -412,7 +482,9 @@ export default function SpotsTable({ parking }: Props) {
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">
+            Une erreur est survenue lors du chargement des données
+          </Text>
         </Flex>
       )}
     </Stack>

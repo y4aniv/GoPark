@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  Flex,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Flex, Stack, Text } from "@mantine/core";
 import { useEffect, useState, useMemo } from "react";
 import { DataTable } from "mantine-datatable";
 
@@ -43,20 +39,25 @@ export default function BadParkedTable({ data }: Props) {
     return data.slice(from, from + PAGE_SIZE);
   }, [data, page]);
 
-  const columns = useMemo(() => [
-    { accessor: "spot.tag", title: "Place N°" },
-    { accessor: "license_plate", title: "Plaque d'immatriculation" },
-    {
-      accessor: "owner",
-      title: "Propriétaire de la voiture",
-      render: ({ owner }: BadParkedData) => `${owner.first_name} ${owner.last_name}`
-    },
-    {
-      accessor: "spot.owner",
-      title: "Propriétaire de la place",
-      render: ({ spot }: BadParkedData) => `${spot.owner.first_name} ${spot.owner.last_name}`
-    },
-  ], []);
+  const columns = useMemo(
+    () => [
+      { accessor: "spot.tag", title: "Place N°" },
+      { accessor: "license_plate", title: "Plaque d'immatriculation" },
+      {
+        accessor: "owner",
+        title: "Propriétaire de la voiture",
+        render: ({ owner }: BadParkedData) =>
+          `${owner.first_name} ${owner.last_name}`,
+      },
+      {
+        accessor: "spot.owner",
+        title: "Propriétaire de la place",
+        render: ({ spot }: BadParkedData) =>
+          `${spot.owner.first_name} ${spot.owner.last_name}`,
+      },
+    ],
+    []
+  );
 
   return (
     <Stack>
@@ -73,7 +74,9 @@ export default function BadParkedTable({ data }: Props) {
         />
       ) : (
         <Flex h="150px" justify="center" align="center">
-          <Text ta="center">Une erreur est survenue lors du chargement des données</Text>
+          <Text ta="center">
+            Une erreur est survenue lors du chargement des données
+          </Text>
         </Flex>
       )}
     </Stack>

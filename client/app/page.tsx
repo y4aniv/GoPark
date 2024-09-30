@@ -36,13 +36,23 @@ interface Car {
   brand: string;
   model: string;
   color: string;
+  owner: string;
 }
 
 export default function Root(): React.ReactElement {
-  const [createParkingDrawerOpened, { open: openCreateParkingDrawer, close: closeCreateParkingDrawer }] = useDisclosure();
-  const [createCarDrawerOpened, { open: openCreateCarDrawer, close: closeCreateCarDrawer }] = useDisclosure();
-  const [createPersonDrawerOpened, { open: openCreatePersonDrawer, close: closeCreatePersonDrawer }] = useDisclosure();
-  
+  const [
+    createParkingDrawerOpened,
+    { open: openCreateParkingDrawer, close: closeCreateParkingDrawer },
+  ] = useDisclosure();
+  const [
+    createCarDrawerOpened,
+    { open: openCreateCarDrawer, close: closeCreateCarDrawer },
+  ] = useDisclosure();
+  const [
+    createPersonDrawerOpened,
+    { open: openCreatePersonDrawer, close: closeCreatePersonDrawer },
+  ] = useDisclosure();
+
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [persons, setPersons] = useState<Person[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
@@ -53,13 +63,15 @@ export default function Root(): React.ReactElement {
   }>({
     parkings: false,
     persons: false,
-    cars: false
+    cars: false,
   });
 
   useEffect(() => {
     const fetchParkings = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/parkings`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/parkings`
+        );
         setParkings(response.data.parkings);
         setErrors({ ...errors, parkings: false });
       } catch {
@@ -73,7 +85,9 @@ export default function Root(): React.ReactElement {
   useEffect(() => {
     const fetchPersons = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/persons`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/persons`
+        );
         setPersons(response.data.persons);
         setErrors({ ...errors, persons: false });
       } catch {
@@ -87,7 +101,9 @@ export default function Root(): React.ReactElement {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cars`);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/cars`
+        );
         setCars(response.data.cars);
         setErrors({ ...errors, cars: false });
       } catch {
@@ -100,9 +116,25 @@ export default function Root(): React.ReactElement {
 
   return (
     <>
-    <CreateParkingDrawer opened={createParkingDrawerOpened} onClose={closeCreateParkingDrawer} parkings={parkings} setParkings={setParkings}  />
-    <CreateCarDrawer opened={createCarDrawerOpened} onClose={closeCreateCarDrawer} cars={cars} setCars={setCars} persons={persons} />
-    <CreatePersonDrawer opened={createPersonDrawerOpened} onClose={closeCreatePersonDrawer} persons={persons} setPersons={setPersons} />
+      <CreateParkingDrawer
+        opened={createParkingDrawerOpened}
+        onClose={closeCreateParkingDrawer}
+        parkings={parkings}
+        setParkings={setParkings}
+      />
+      <CreateCarDrawer
+        opened={createCarDrawerOpened}
+        onClose={closeCreateCarDrawer}
+        cars={cars}
+        setCars={setCars}
+        persons={persons}
+      />
+      <CreatePersonDrawer
+        opened={createPersonDrawerOpened}
+        onClose={closeCreatePersonDrawer}
+        persons={persons}
+        setPersons={setPersons}
+      />
       <AppShell header={{ height: 60 }}>
         <AppShell.Header>
           <Flex justify="center" align="center" h="100%">
@@ -113,16 +145,14 @@ export default function Root(): React.ReactElement {
           <Stack p="xl" gap="xl">
             <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
               <Title order={2}>Liste des parkings</Title>
-              <Button onClick={openCreateParkingDrawer}> 
+              <Button onClick={openCreateParkingDrawer}>
                 Ajouter un parking
               </Button>
             </Flex>
             <ParkingsTable parkings={parkings} error={errors.parkings} />
             <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
               <Title order={2}>Liste des voitures</Title>
-              <Button onClick={openCreateCarDrawer}>
-                Ajouter une voiture
-              </Button>
+              <Button onClick={openCreateCarDrawer}>Ajouter une voiture</Button>
             </Flex>
             <CarsTable cars={cars} error={errors.cars} />
             <Flex justify="space-between" wrap={"wrap"} gap={"md"}>
