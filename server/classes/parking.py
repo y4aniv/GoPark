@@ -5,12 +5,14 @@ from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
 from utils.sqlalchemy import Base, Session as session
 
+# Importation conditionnelle pour éviter les problèmes de dépendances circulaires
 if TYPE_CHECKING:
     from classes import Person, Subscription
 
 class Parking(Base):
     __tablename__ = 'parkings'
     
+    # Définition des colonnes de la table 'parkings'
     id = Column(String, primary_key=True)
     name = Column(String, nullable=False)
     address = Column(String, nullable=False)
@@ -19,6 +21,7 @@ class Parking(Base):
     levels = Column(Integer, nullable=False)
     spots_per_level = Column(Integer, nullable=False)
 
+    # Définition des relations avec les tables 'Spot' et 'Subscription'
     spots = relationship('Spot', back_populates='parking', enable_typechecks=False, lazy=True)
     subscriptions = relationship('Subscription', back_populates='parking', enable_typechecks=False, lazy=True)
 
@@ -43,6 +46,7 @@ class Parking(Base):
         - spots_per_level (int) : Nombre de places par étage du parking.
         """
 
+        # Génération d'un identifiant unique pour le parking
         self.id: str = uuid_v4()
         self.name = name
         self.address = address
@@ -50,11 +54,14 @@ class Parking(Base):
         self.city = city
         self.levels = levels
         self.spots_per_level = spots_per_level
+
+        # Création des objets Spot pour chaque place de parking
         self.spots: List['Spot'] = [
             Spot(level, spot, self)
             for level in range(levels)
             for spot in range(spots_per_level)
         ]
+        # Initialisation de la liste des abonnements
         self.subscriptions: List['Subscription'] = []
 
     def to_dict(self) -> dict:
@@ -64,7 +71,6 @@ class Parking(Base):
         Sortie :
         - dict : Dictionnaire contenant les informations de l'objet.
         """
-
         return {
             "id": self.id,
             "name": self.name,

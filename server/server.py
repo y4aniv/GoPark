@@ -742,7 +742,27 @@ def get_car(car_id: str) -> Dict[str, Any]:
 
     return {
         "status": "success",
-        "car": car.to_dict()
+        "car": {
+            "id": car.id,
+            "brand": car.brand,
+            "color": car.color,
+            "license_plate": car.license_plate,
+            "model": car.model,
+            "owner": {
+                "id": car.owner.id,
+                "first_name": car.owner.first_name,
+                "last_name": car.owner.last_name
+            },
+            "spot": {
+                "id": car.spot.id if car.spot else None,
+                "tag": car.spot.tag if car.spot else None,
+            },
+            "parking": {
+                "id": car.spot.parking.id if car.spot else None,
+                "name": car.spot.parking.name if car.spot else None
+            },
+            "bad_parked": car.is_bad_parked(),
+        }
     }, 200
 
 @server.get("/api/persons")
@@ -812,6 +832,37 @@ def create_person() -> Dict[str, Any]:
         "status": "success",
         "person": person.to_dict()
     }, 201
+
+@server.get("/api/persons/<person_id>")
+def get_person(person_id: str) -> Dict[str, Any]:
+    """
+    Récupère une personne.
+
+    Paramètres :
+    - person_id (str) : Identifiant de la personne.
+
+    Sortie :
+    - dict : Personne
+    """
+    person = session.get(Person, person_id)
+
+    if not person:
+        return {
+            "status": "error",
+            "message": "PERSON_NOT_FOUND"
+        }, 404
+
+    return {
+        "status": "success",
+        "person": {
+            "id": person.id,
+            "first_name": person.first_name,
+            "last_name": person.last_name,
+            "birth_date": person.birth_date,
+            "subscriptions": [subscription.to_dict() for subscription in person.subscriptions],
+            "cars": [car.to_dict() for car in person.cars]
+        }
+    }, 200
 
 if __name__ == "__main__":
     server.run(debug=True, port=8000)
