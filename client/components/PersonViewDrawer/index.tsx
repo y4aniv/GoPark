@@ -64,7 +64,7 @@ export default function PersonViewDrawer({
         </Title>
         <Flex justify={"space-between"}>
           <Stack gap={0}>
-            <Title order={3}>{person?.birth_date || <Skeleton />}</Title>
+            <Title order={3}>{new Date(person?.birth_date || "").toLocaleDateString()}</Title>
             <Text>Date de naissance</Text>
           </Stack>
         </Flex>
